@@ -1,7 +1,7 @@
 package Servidor;
 
-public class enemigo extends individuo{
-    protected String ID;
+public class enemigo extends individuo implements ataque{
+    private String ID;
     protected int puntos;
     
     public enemigo(int X, int Y, String ID, int puntos){
@@ -10,7 +10,7 @@ public class enemigo extends individuo{
         this.puntos = puntos;
     }
 
-    @Override
+    
     public void disparo(){}
 
     public String getID(){

@@ -15,6 +15,4 @@ public class bunker extends individuo{
         else {this.conVida = false;}
     }
 
-    @Override
-    public void disparo(){}
 }

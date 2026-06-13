@@ -1,6 +1,6 @@
 package Servidor;
 
-public class jugador extends individuo {
+public class jugador extends individuo implements ataque {
     protected int cantidadPuntos;
     protected int cantidadVidas;
 
@@ -8,10 +8,6 @@ public class jugador extends individuo {
         super(X, Y);
         this.cantidadPuntos = 0;
         this.cantidadVidas = vidas;
-    }
-
-    @Override
-    public void disparo() {
     }
 
     public void sumarPuntos(int puntos){
@@ -28,4 +24,6 @@ public class jugador extends individuo {
         }
         else {this.conVida = false;}
     }
+
+    public void disparo(){}
 }

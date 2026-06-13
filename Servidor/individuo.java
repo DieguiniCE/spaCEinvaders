@@ -18,8 +18,6 @@ public abstract class individuo {
         }
     }
 
-    abstract public void disparo();
-
     public int getposX(){
         return this.posX;
     }
