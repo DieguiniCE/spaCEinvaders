@@ -23,7 +23,7 @@ public class jugador extends individuo {
     }
 
     public void perderVida(){
-        if (cantidadVidas >= 0){
+        if (cantidadVidas >= 1){
             this.cantidadVidas -=1;
         }
         else {this.conVida = false;}
