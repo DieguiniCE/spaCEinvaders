@@ -16,12 +16,12 @@ public class server {
             streamServidor = new ServerSocket(port);
             System.out.println("Conectado");
 
-            System.out.println("Waiting for a client ...");
+            System.out.println("Esperando conexion");
 
             stream = streamServidor.accept();
-            System.out.println("Client accepted");
+            System.out.println("Cliente aceptado");
 
-            // Takes input from the client socket
+            // agarra lo quue le mande el cliente
             entrada = new DataInputStream(new BufferedInputStream(stream.getInputStream()));
             salida = new DataOutputStream(stream.getOutputStream());
 		}
@@ -42,7 +42,7 @@ public class server {
             try
             {
                 mensaje = entrada.readUTF();
-					salida.writeUTF(mensaje);
+				salida.writeUTF(mensaje);
                 System.out.println(mensaje);
 				}
             catch (IOException errorsito2)
@@ -51,9 +51,9 @@ public class server {
             }
 			}
 
-        System.out.println("Closing connection");
+        System.out.println("Cerrando conexion");
 
-        // Close connection
+        // Cerrar conexión
         try
         {
             stream.close();
@@ -64,4 +64,9 @@ public class server {
             System.out.println(error);
         }
     }
+
+	public static  void main(String[] args) {
+        server c = new server(5000);
 }
+}
+
