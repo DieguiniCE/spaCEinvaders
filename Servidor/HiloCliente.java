@@ -71,6 +71,29 @@ public class HiloCliente extends Thread implements Observadorsito {
                         }
                         break;
 
+                    case "MATE_OVNI":
+                        if (esJugador && partesMensaje.length > 1) {
+                            try {
+                                int idOvni = Integer.parseInt(partesMensaje[1]);
+                                miPartida.ovniEliminado(miJugador, idOvni);
+                            } catch (NumberFormatException errorOvni) {
+                                System.out.println("OVNI invalido: " + errorOvni.getMessage());
+                            }
+                        }
+                        break;
+
+                    case "BUNKER_HIT":
+                        if (partesMensaje.length > 2) {
+                            try {
+                                int indiceBunker = Integer.parseInt(partesMensaje[1]);
+                                int dano = Integer.parseInt(partesMensaje[2]);
+                                miPartida.bunkerGolpeado(indiceBunker, dano);
+                            } catch (NumberFormatException errorBunker) {
+                                System.out.println("Bunker invalido: " + errorBunker.getMessage());
+                            }
+                        }
+                        break;
+
                     case "PERDI_VIDA":
                         if (esJugador) {
                             miPartida.jugadorPierdeVida(miJugador);

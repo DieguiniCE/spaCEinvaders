@@ -1,6 +1,7 @@
 package Servidor;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Partida {
 
@@ -12,10 +13,26 @@ public class Partida {
     private static final int ALIEN_ANCHO = 30;
     private static final int ALIEN_ALTO = 20;
 
+    private static final class EstadoOvni {
+        final int id;
+        int x;
+        int y;
+        int direccion;
+        int puntos;
+
+        EstadoOvni(int id, int x, int y, int direccion, int puntos) {
+            this.id = id;
+            this.x = x;
+            this.y = y;
+            this.direccion = direccion;
+            this.puntos = puntos;
+        }
+    }
+
     private static final class EstadoAlien {
         final int id;
-        final int x;
-        final int y;
+        int x;
+        int y;
         final int puntos;
         final int tipo;
 
@@ -31,17 +48,31 @@ public class Partida {
     private final ArrayList<jugador> listaJugadores;
     private final ArrayList<Observadorsito> listaObservadores;
     private final ArrayList<EstadoAlien> listaAliens;
+    private final int[] bunkerSalud;
+    private final Random random;
     private double velocidadAliens;
     private String estadoBunkers;
     private int contadorAliens;
+    private int contadorOvni;
+    private EstadoOvni ovniActual;
+    private int direccionAliens;
 
     public Partida() {
         this.listaJugadores = new ArrayList<>();
         this.listaObservadores = new ArrayList<>();
         this.listaAliens = new ArrayList<>();
+        this.bunkerSalud = new int[] {100, 100, 100, 100};
+        this.random = new Random();
         this.velocidadAliens = 1.0;
-        this.estadoBunkers = "100%";
+        this.estadoBunkers = "100,100,100,100";
         this.contadorAliens = 0;
+        this.contadorOvni = 0;
+        this.ovniActual = null;
+        this.direccionAliens = 1;
+
+        Thread hiloEventos = new Thread(this::bucleEventosAutomaticos, "PartidaEventos");
+        hiloEventos.setDaemon(true);
+        hiloEventos.start();
     }
 
     public synchronized jugador crearJugador(int idJugador) {
@@ -81,6 +112,11 @@ public class Partida {
 
         cliente.recibirActualizacion("VELOCIDAD," + this.velocidadAliens);
         cliente.recibirActualizacion("BUNKERS," + this.estadoBunkers);
+        if (ovniActual != null) {
+            cliente.recibirActualizacion(
+                "NUEVO_OVNI," + ovniActual.id + "," + ovniActual.x + "," + ovniActual.y + "," + ovniActual.direccion + "," + ovniActual.puntos
+            );
+        }
     }
 
     public synchronized void quitarObservador(Observadorsito observador) {
@@ -92,6 +128,153 @@ public class Partida {
         for (Observadorsito observador : copia) {
             observador.recibirActualizacion(mensaje);
         }
+    }
+
+    private void bucleEventosAutomaticos() {
+        while (true) {
+            try {
+                Thread.sleep(150);
+            } catch (InterruptedException error) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+
+            synchronized (this) {
+                actualizarAliens();
+                actualizarOvni();
+            }
+        }
+    }
+
+    private void actualizarAliens() {
+        if (listaAliens.isEmpty()) {
+            return;
+        }
+
+        int paso = (int) Math.max(1, Math.round(velocidadAliens));
+        int minX = ANCHO_PANTALLA;
+        int maxX = 0;
+
+        for (EstadoAlien alien : listaAliens) {
+            if (alien.x < minX) {
+                minX = alien.x;
+            }
+            if (alien.x > maxX) {
+                maxX = alien.x;
+            }
+        }
+
+        boolean golpeaBorde = (direccionAliens > 0 && maxX + ALIEN_ANCHO + paso >= ANCHO_PANTALLA - 20)
+            || (direccionAliens < 0 && minX - paso <= 20);
+
+        if (golpeaBorde) {
+            direccionAliens *= -1;
+            for (EstadoAlien alien : listaAliens) {
+                alien.y += 16;
+            }
+        } else {
+            for (EstadoAlien alien : listaAliens) {
+                alien.x += (paso * direccionAliens);
+            }
+        }
+
+        ArrayList<EstadoAlien> eliminados = new ArrayList<>();
+
+        for (EstadoAlien alien : listaAliens) {
+            if (alien.y + ALIEN_ALTO >= ALTO_PANTALLA - 55) {
+                jugador jugadorObjetivo = jugadorMasCercano(alien.x, alien.y);
+                if (jugadorObjetivo != null) {
+                    jugadorPierdeVida(jugadorObjetivo);
+                }
+                eliminados.add(alien);
+                continue;
+            }
+
+            for (int i = 0; i < bunkerSalud.length; i++) {
+                if (!bunkerActivo(i)) {
+                    continue;
+                }
+
+                int bunkerX = bunkerX(i);
+                int bunkerY = ALTO_PANTALLA - 150;
+                boolean chocaBunker = alien.x < bunkerX + 60 && alien.x + ALIEN_ANCHO > bunkerX
+                    && alien.y < bunkerY + 35 && alien.y + ALIEN_ALTO > bunkerY;
+                if (chocaBunker) {
+                    bunkerGolpeado(i, 15);
+                    eliminados.add(alien);
+                    break;
+                }
+            }
+        }
+
+        if (!eliminados.isEmpty()) {
+            listaAliens.removeAll(eliminados);
+            for (EstadoAlien alien : eliminados) {
+                notificarTodos("BORRAR_ALIEN," + alien.id);
+            }
+
+            if (listaAliens.isEmpty()) {
+                oleadaLimpiada(null);
+            }
+        }
+
+        for (EstadoAlien alien : listaAliens) {
+            notificarTodos("MOVER_ALIEN," + alien.id + "," + alien.x + "," + alien.y);
+        }
+    }
+
+    private jugador jugadorMasCercano(int x, int y) {
+        jugador mejor = null;
+        int mejorDistancia = Integer.MAX_VALUE;
+
+        for (jugador candidato : listaJugadores) {
+            int distancia = Math.abs(candidato.getposX() - x) + Math.abs(candidato.getposY() - y);
+            if (distancia < mejorDistancia) {
+                mejorDistancia = distancia;
+                mejor = candidato;
+            }
+        }
+
+        return mejor;
+    }
+
+    private int bunkerX(int indice) {
+        switch (indice) {
+            case 0: return 120;
+            case 1: return 275;
+            case 2: return 430;
+            case 3: return 585;
+            default: return 0;
+        }
+    }
+
+    private void actualizarOvni() {
+        if (ovniActual == null) {
+            if (random.nextInt(70) == 0) {
+                crearOvniAleatorio();
+            }
+            return;
+        }
+
+        ovniActual.x += ovniActual.direccion * 8;
+        if (ovniActual.x < -40 || ovniActual.x > ANCHO_PANTALLA + 40) {
+            notificarTodos("BORRAR_OVNI," + ovniActual.id);
+            ovniActual = null;
+            return;
+        }
+
+        notificarTodos("MOVER_OVNI," + ovniActual.id + "," + ovniActual.x + "," + ovniActual.y);
+    }
+
+    private void crearOvniAleatorio() {
+        int direccion = random.nextBoolean() ? 1 : -1;
+        int x = (direccion > 0) ? -40 : (ANCHO_PANTALLA + 10);
+        int puntos = 50 + random.nextInt(251);
+        ovniActual = new EstadoOvni(++contadorOvni, x, 25, direccion, puntos);
+
+        notificarTodos(
+            "NUEVO_OVNI," + ovniActual.id + "," + ovniActual.x + "," + ovniActual.y + "," + ovniActual.direccion + "," + ovniActual.puntos
+        );
     }
 
     private void limitarPosicion(jugador jugadorActual) {
@@ -159,6 +342,8 @@ public class Partida {
             return;
         }
 
+        this.direccionAliens = 1;
+
         for (int fila = 0; fila < 4; fila++) {
             int puntos = 10;
             if (fila == 0) {
@@ -211,6 +396,51 @@ public class Partida {
         }
     }
 
+    public synchronized void ovniEliminado(jugador jugadorActual, int idOvni) {
+        if (ovniActual == null || ovniActual.id != idOvni) {
+            return;
+        }
+
+        int puntosExtras = ovniActual.puntos;
+        ovniActual = null;
+        notificarTodos("BORRAR_OVNI," + idOvni);
+
+        if (jugadorActual != null) {
+            jugadorActual.sumarPuntos(puntosExtras);
+            notificarTodos("PUNTOS_J" + jugadorActual.idJugador + "," + jugadorActual.getPuntos());
+            enviarEstadoJugador(jugadorActual);
+        }
+    }
+
+    public synchronized void bunkerGolpeado(int indice, int dano) {
+        if (indice < 0 || indice >= bunkerSalud.length) {
+            return;
+        }
+
+        bunkerSalud[indice] -= dano;
+        if (bunkerSalud[indice] < 0) {
+            bunkerSalud[indice] = 0;
+        }
+
+        actualizarEstadoBunkers();
+    }
+
+    public synchronized boolean bunkerActivo(int indice) {
+        return indice >= 0 && indice < bunkerSalud.length && bunkerSalud[indice] > 0;
+    }
+
+    public synchronized int estadoBunker(int indice) {
+        if (indice < 0 || indice >= bunkerSalud.length) {
+            return 0;
+        }
+        return bunkerSalud[indice];
+    }
+
+    private void actualizarEstadoBunkers() {
+        this.estadoBunkers = bunkerSalud[0] + "," + bunkerSalud[1] + "," + bunkerSalud[2] + "," + bunkerSalud[3];
+        notificarTodos("BUNKERS," + this.estadoBunkers);
+    }
+
     public synchronized void jugadorPierdeVida(jugador jugadorActual) {
         if (jugadorActual == null) return;
 
@@ -253,7 +483,16 @@ public class Partida {
     }
 
     public synchronized void adminCrearOvni(String direccion, String pts) {
-        notificarTodos("NUEVO_OVNI," + direccion + "," + pts);
+        try {
+            int dir = direccion.equalsIgnoreCase("R") || direccion.equals("1") ? 1 : -1;
+            int puntos = Integer.parseInt(pts);
+            ovniActual = new EstadoOvni(++contadorOvni, dir > 0 ? -40 : (ANCHO_PANTALLA + 10), 25, dir, puntos);
+            notificarTodos(
+                "NUEVO_OVNI," + ovniActual.id + "," + ovniActual.x + "," + ovniActual.y + "," + ovniActual.direccion + "," + ovniActual.puntos
+            );
+        } catch (NumberFormatException e) {
+            System.out.println("No se pudo crear OVNI: " + e.getMessage());
+        }
     }
 
     public synchronized void adminVelocidad(String velocidad) {
@@ -266,7 +505,23 @@ public class Partida {
     }
 
     public synchronized void adminBunkers(String porcentaje) {
-        this.estadoBunkers = porcentaje;
-        notificarTodos("BUNKERS," + porcentaje);
+        try {
+            String limpio = porcentaje.replace("%", "");
+            int valor = Integer.parseInt(limpio);
+            if (valor < 0) {
+                valor = 0;
+            }
+            if (valor > 100) {
+                valor = 100;
+            }
+
+            for (int i = 0; i < bunkerSalud.length; i++) {
+                bunkerSalud[i] = valor;
+            }
+
+            actualizarEstadoBunkers();
+        } catch (NumberFormatException e) {
+            System.out.println("No se pudo actualizar bunkers: " + e.getMessage());
+        }
     }
 }

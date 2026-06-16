@@ -23,6 +23,7 @@ public class server {
         try {
             this.streamServidor = new ServerSocket(port);
             System.out.println("Servidor spaCEinvaders escuchando en puerto " + port);
+            pedirConfiguracionInicial();
             this.partida.inicializarOleadaDefecto();
 
             Thread consolaAdmin = new Thread(this::leerComandosAdmin, "AdminConsole");
@@ -34,6 +35,21 @@ public class server {
             System.out.println(error);
             throw new RuntimeException(error);
         }
+    }
+
+    private void pedirConfiguracionInicial() throws IOException {
+        BufferedReader entrada = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
+        System.out.print("Velocidad inicial de aliens (Enter = 1.0): ");
+        String linea = entrada.readLine();
+
+        if (linea != null) {
+            String velocidad = linea.trim();
+            if (!velocidad.isEmpty()) {
+                partida.adminVelocidad(velocidad);
+            }
+        }
+
+        System.out.println("Comandos en caliente: Crear X Y Pts | OVNI R 100 | Velocidad 100 | Bunkers 75");
     }
 
     private void aceptarClientes() {

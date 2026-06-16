@@ -26,12 +26,69 @@ typedef struct {
     int puntos;
 } EstadoJugador;
 
+typedef struct {
+    int x;
+    int y;
+    int vida;
+} BunkerLocal;
+
+typedef struct {
+    int activo;
+    int id;
+    int x;
+    int y;
+    int direccion;
+    int puntos;
+} OvniLocal;
+
 static EstadoJugador Jugador1 = {0, 0, ALTO_PANTALLA - 50, 3, 0};
 static EstadoJugador Jugador2 = {0, 0, ALTO_PANTALLA - 50, 3, 0};
 static NodoAlien* CabezaAliens = NULL;
 static char TextoBunkers[32] = "100%";
 static double VelocidadAliens = 1.0;
+static BunkerLocal Bunkers[4];
+static OvniLocal OvniActual = {0, 0, 0, 0, 0, 0};
 static CRITICAL_SECTION BloqueoEstado;
+
+static void InicializarBunkers(void) {
+    int posicionesX[4] = {120, 275, 430, 585};
+    for (int i = 0; i < 4; i++) {
+        Bunkers[i].x = posicionesX[i];
+        Bunkers[i].y = ALTO_PANTALLA - 150;
+        Bunkers[i].vida = 100;
+    }
+}
+
+static void ActualizarBunkersDesdeTexto(const char* texto) {
+    int vida0 = 100, vida1 = 100, vida2 = 100, vida3 = 100;
+    if (sscanf(texto, "%d,%d,%d,%d", &vida0, &vida1, &vida2, &vida3) == 4) {
+        Bunkers[0].vida = vida0;
+        Bunkers[1].vida = vida1;
+        Bunkers[2].vida = vida2;
+        Bunkers[3].vida = vida3;
+    } else if (sscanf(texto, "%d%%", &vida0) == 1 || sscanf(texto, "%d", &vida0) == 1) {
+        Bunkers[0].vida = vida0;
+        Bunkers[1].vida = vida0;
+        Bunkers[2].vida = vida0;
+        Bunkers[3].vida = vida0;
+    }
+}
+
+static void DibujarBunkers(void) {
+    for (int i = 0; i < 4; i++) {
+        if (Bunkers[i].vida <= 0) {
+            continue;
+        }
+
+        Color color = DARKGREEN;
+        if (Bunkers[i].vida < 75) color = GREEN;
+        if (Bunkers[i].vida < 50) color = LIME;
+        if (Bunkers[i].vida < 25) color = YELLOW;
+
+        DrawRectangle(Bunkers[i].x, Bunkers[i].y, 60, 35, color);
+        DrawRectangleLines(Bunkers[i].x, Bunkers[i].y, 60, 35, DARKGRAY);
+    }
+}
 
 static void ProcesarLineaEspectador(const char* linea) {
     int jugador = 0;
@@ -58,6 +115,42 @@ static void ProcesarLineaEspectador(const char* linea) {
         return;
     }
 
+    if (sscanf(linea, "MOVER_ALIEN,%d,%d,%d", &idAlien, &x, &y) == 3) {
+        for (NodoAlien* nodo = CabezaAliens; nodo != NULL; nodo = nodo->siguiente) {
+            if (nodo->dato.id == idAlien) {
+                nodo->dato.x = x;
+                nodo->dato.y = y;
+                break;
+            }
+        }
+        return;
+    }
+
+    if (sscanf(linea, "NUEVO_OVNI,%d,%d,%d,%d,%d", &idAlien, &x, &y, &vidas, &puntos) == 5) {
+        OvniActual.activo = 1;
+        OvniActual.id = idAlien;
+        OvniActual.x = x;
+        OvniActual.y = y;
+        OvniActual.direccion = vidas;
+        OvniActual.puntos = puntos;
+        return;
+    }
+
+    if (sscanf(linea, "MOVER_OVNI,%d,%d,%d", &idAlien, &x, &y) == 3) {
+        if (OvniActual.activo && OvniActual.id == idAlien) {
+            OvniActual.x = x;
+            OvniActual.y = y;
+        }
+        return;
+    }
+
+    if (sscanf(linea, "BORRAR_OVNI,%d", &idAlien) == 1) {
+        if (OvniActual.activo && OvniActual.id == idAlien) {
+            OvniActual.activo = 0;
+        }
+        return;
+    }
+
     if (sscanf(linea, "BORRAR_ALIEN,%d", &idAlien) == 1) {
         CabezaAliens = eliminar_alien(CabezaAliens, idAlien);
         return;
@@ -68,6 +161,7 @@ static void ProcesarLineaEspectador(const char* linea) {
     }
 
     if (sscanf(linea, "BUNKERS,%31s", TextoBunkers) == 1) {
+        ActualizarBunkersDesdeTexto(TextoBunkers);
         return;
     }
 }
@@ -104,6 +198,7 @@ DWORD WINAPI EscucharServidorEspectador(LPVOID parametro) {
 
 int main(void) {
     InitializeCriticalSection(&BloqueoEstado);
+    InicializarBunkers();
 
     WSADATA wsaData;
     WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -133,6 +228,13 @@ int main(void) {
         for (NodoAlien* nodo = CabezaAliens; nodo != NULL; nodo = nodo->siguiente) {
             DrawRectangle(nodo->dato.x, nodo->dato.y, 30, 20, MAGENTA);
         }
+
+        if (OvniActual.activo) {
+            DrawRectangle(OvniActual.x, OvniActual.y, 48, 20, SKYBLUE);
+            DrawText(TextFormat("%d", OvniActual.puntos), OvniActual.x + 8, OvniActual.y - 14, 12, SKYBLUE);
+        }
+
+        DibujarBunkers();
 
         if (Jugador1.activo) {
             DrawRectangle(Jugador1.x, Jugador1.y, ANCHO_CANON, ALTO_CANON, GREEN);

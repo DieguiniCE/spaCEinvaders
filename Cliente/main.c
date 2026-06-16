@@ -28,6 +28,21 @@ typedef struct {
 } ContextoServidor;
 
 typedef struct {
+    int x;
+    int y;
+    int vida;
+} BunkerLocal;
+
+typedef struct {
+    int activo;
+    int id;
+    int x;
+    int y;
+    int direccion;
+    int puntos;
+} OvniLocal;
+
+typedef struct {
     PuertoSerial* puerto;
     SOCKET socketServidor;
     int* servidorConectado;
@@ -42,12 +57,80 @@ static char TextoBunkers[32] = "100%";
 static double VelocidadAliens = 1.0;
 static int JuegoActivo = 1;
 static NodoAlien* cabezaListaAliens = NULL;
+static BunkerLocal Bunkers[4];
+static OvniLocal OvniActual = {0, 0, 0, 0, 0, 0};
 static int DireccionAliens = 1;
 static int DisparoAlienActivo = 0;
 static int DisparoAlienX = 0;
 static int DisparoAlienY = 0;
 static int DisparoAlienVelocidad = 0;
 static unsigned int UltimoDisparoAlienMs = 0;
+
+static void InicializarBunkers(void) {
+    int posicionesX[4] = {120, 275, 430, 585};
+    for (int i = 0; i < 4; i++) {
+        Bunkers[i].x = posicionesX[i];
+        Bunkers[i].y = ALTO_PANTALLA - 150;
+        Bunkers[i].vida = 100;
+    }
+}
+
+static void ActualizarBunkersDesdeTexto(const char* texto) {
+    int vida0 = 100, vida1 = 100, vida2 = 100, vida3 = 100;
+    if (sscanf(texto, "%d,%d,%d,%d", &vida0, &vida1, &vida2, &vida3) == 4) {
+        Bunkers[0].vida = vida0;
+        Bunkers[1].vida = vida1;
+        Bunkers[2].vida = vida2;
+        Bunkers[3].vida = vida3;
+    } else if (sscanf(texto, "%d%%", &vida0) == 1 || sscanf(texto, "%d", &vida0) == 1) {
+        Bunkers[0].vida = vida0;
+        Bunkers[1].vida = vida0;
+        Bunkers[2].vida = vida0;
+        Bunkers[3].vida = vida0;
+    }
+}
+
+static int HitBunker(int x, int y, int ancho, int alto) {
+    for (int i = 0; i < 4; i++) {
+        if (Bunkers[i].vida <= 0) {
+            continue;
+        }
+
+        if (x < Bunkers[i].x + 60 && x + ancho > Bunkers[i].x &&
+            y < Bunkers[i].y + 35 && y + alto > Bunkers[i].y) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+static void DañarBunkerLocal(int indice, int dano) {
+    if (indice < 0 || indice >= 4 || Bunkers[indice].vida <= 0) {
+        return;
+    }
+
+    Bunkers[indice].vida -= dano;
+    if (Bunkers[indice].vida < 0) {
+        Bunkers[indice].vida = 0;
+    }
+}
+
+static void DibujarBunkers(void) {
+    for (int i = 0; i < 4; i++) {
+        if (Bunkers[i].vida <= 0) {
+            continue;
+        }
+
+        Color color = DARKGREEN;
+        if (Bunkers[i].vida < 75) color = GREEN;
+        if (Bunkers[i].vida < 50) color = LIME;
+        if (Bunkers[i].vida < 25) color = YELLOW;
+
+        DrawRectangle(Bunkers[i].x, Bunkers[i].y, 60, 35, color);
+        DrawRectangleLines(Bunkers[i].x, Bunkers[i].y, 60, 35, DARKGRAY);
+    }
+}
 
 static void EnviarLineaAlServidor(SOCKET socketServidor, const char* mensaje) {
     if (socketServidor == INVALID_SOCKET || !ServidorConectado) {
@@ -126,7 +209,11 @@ static void CrearOleadaAliens(void) {
     }
 }
 
-static void ActualizarAliens(float deltaTime) {
+static void ActualizarAliens(float deltaTime, nave* canon, SOCKET socketServidor) {
+    if (ServidorConectado) {
+        return;
+    }
+
     if (cabezaListaAliens == NULL) {
         return;
     }
@@ -161,6 +248,42 @@ static void ActualizarAliens(float deltaTime) {
             nodo->dato.x += (paso * DireccionAliens);
         }
     }
+
+    NodoAlien** enlaceActual = &cabezaListaAliens;
+    while (*enlaceActual != NULL) {
+        NodoAlien* nodo = *enlaceActual;
+        int alienX = nodo->dato.x;
+        int alienY = nodo->dato.y;
+        int alienAncho = 30;
+        int alienAlto = 20;
+        int alienCayoEnJugador = (alienY + alienAlto >= canon->y && alienX < canon->x + ANCHO_CANON && alienX + alienAncho > canon->x);
+
+        int bunkerImpactado = HitBunker(alienX, alienY, alienAncho, alienAlto);
+        if (bunkerImpactado >= 0) {
+            DañarBunkerLocal(bunkerImpactado, 20);
+            char mensajeBunker[64];
+            snprintf(mensajeBunker, sizeof(mensajeBunker), "BUNKER_HIT,%d,%d", bunkerImpactado, 20);
+            EnviarLineaAlServidor(socketServidor, mensajeBunker);
+            *enlaceActual = nodo->siguiente;
+            free(nodo);
+            continue;
+        }
+
+        if (alienCayoEnJugador || alienY + alienAlto >= canon->y) {
+            if (canon->vidas > 0) {
+                canon->vidas -= 1;
+            }
+            EnviarLineaAlServidor(socketServidor, "PERDI_VIDA");
+            *enlaceActual = nodo->siguiente;
+            free(nodo);
+            if (canon->vidas <= 0) {
+                JuegoActivo = 0;
+            }
+            continue;
+        }
+
+        enlaceActual = &(*enlaceActual)->siguiente;
+    }
 }
 
 static NodoAlien* AlienMasBajoPorColumna(int columnaObjetivo) {
@@ -177,19 +300,32 @@ static NodoAlien* AlienMasBajoPorColumna(int columnaObjetivo) {
     return mejor;
 }
 
-static void ActualizarDisparoAlien(float deltaTime, nave* canon) {
+static void ActualizarDisparoAlien(float deltaTime, nave* canon, SOCKET socketServidor) {
     if (DisparoAlienActivo) {
-        DisparoAlienY += (int)(DisparoAlienVelocidad * deltaTime);
+        DisparoAlienY += DisparoAlienVelocidad;
         if (DisparoAlienY > ALTO_PANTALLA) {
             DisparoAlienActivo = 0;
-        } else if (DisparoAlienX >= canon->x && DisparoAlienX <= canon->x + ANCHO_CANON &&
-                   DisparoAlienY >= canon->y && DisparoAlienY <= canon->y + ALTO_CANON) {
-            if (canon->vidas > 0) {
-                canon->vidas -= 1;
+        } else {
+            int bunkerImpactado = HitBunker(DisparoAlienX, DisparoAlienY, 4, 10);
+            if (bunkerImpactado >= 0) {
+                DañarBunkerLocal(bunkerImpactado, 10);
+                char mensaje[64];
+                snprintf(mensaje, sizeof(mensaje), "BUNKER_HIT,%d,%d", bunkerImpactado, 10);
+                EnviarLineaAlServidor(socketServidor, mensaje);
+                DisparoAlienActivo = 0;
+                return;
             }
-            DisparoAlienActivo = 0;
-            if (canon->vidas <= 0) {
-                JuegoActivo = 0;
+
+            if (DisparoAlienX >= canon->x && DisparoAlienX <= canon->x + ANCHO_CANON &&
+                DisparoAlienY >= canon->y && DisparoAlienY <= canon->y + ALTO_CANON) {
+                if (canon->vidas > 0) {
+                    canon->vidas -= 1;
+                }
+                EnviarLineaAlServidor(socketServidor, "PERDI_VIDA");
+                DisparoAlienActivo = 0;
+                if (canon->vidas <= 0) {
+                    JuegoActivo = 0;
+                }
             }
         }
     }
@@ -284,6 +420,42 @@ static void ProcesarMensajeServidor(
         return;
     }
 
+    if (sscanf(mensaje, "MOVER_ALIEN,%d,%d,%d", &idAlien, &x, &y) == 3) {
+        for (NodoAlien* nodo = *cabezaAliens; nodo != NULL; nodo = nodo->siguiente) {
+            if (nodo->dato.id == idAlien) {
+                nodo->dato.x = x;
+                nodo->dato.y = y;
+                break;
+            }
+        }
+        return;
+    }
+
+    if (sscanf(mensaje, "NUEVO_OVNI,%d,%d,%d,%d,%d", &idAlien, &x, &y, &vidas, &puntos) == 5) {
+        OvniActual.activo = 1;
+        OvniActual.id = idAlien;
+        OvniActual.x = x;
+        OvniActual.y = y;
+        OvniActual.direccion = vidas;
+        OvniActual.puntos = puntos;
+        return;
+    }
+
+    if (sscanf(mensaje, "MOVER_OVNI,%d,%d,%d", &idAlien, &x, &y) == 3) {
+        if (OvniActual.activo && OvniActual.id == idAlien) {
+            OvniActual.x = x;
+            OvniActual.y = y;
+        }
+        return;
+    }
+
+    if (sscanf(mensaje, "BORRAR_OVNI,%d", &idAlien) == 1) {
+        if (OvniActual.activo && OvniActual.id == idAlien) {
+            OvniActual.activo = 0;
+        }
+        return;
+    }
+
     if (sscanf(mensaje, "BORRAR_ALIEN,%d", &idAlien) == 1) {
         *cabezaAliens = eliminar_alien(*cabezaAliens, idAlien);
         return;
@@ -298,6 +470,12 @@ static void ProcesarMensajeServidor(
     }
 
     if (sscanf(mensaje, "BUNKERS,%31s", textoBunkers) == 1) {
+        ActualizarBunkersDesdeTexto(textoBunkers);
+        return;
+    }
+
+    if (sscanf(mensaje, "BUNKER_HIT,%d,%d", &idAlien, &vidas) == 2) {
+        DañarBunkerLocal(idAlien, vidas);
         return;
     }
 
@@ -322,6 +500,16 @@ static void ActualizarProyectil(Proyectil* proyectil, NodoAlien** cabezaAliens, 
         return;
     }
 
+    int bunkerImpactado = HitBunker(proyectil->x, proyectil->y, 4, 10);
+    if (bunkerImpactado >= 0) {
+        DañarBunkerLocal(bunkerImpactado, 20);
+        char mensajeBunker[64];
+        snprintf(mensajeBunker, sizeof(mensajeBunker), "BUNKER_HIT,%d,%d", bunkerImpactado, 20);
+        EnviarLineaAlServidor(socket, mensajeBunker);
+        proyectil->activo = 0;
+        return;
+    }
+
     NodoAlien* actual = *cabezaAliens;
     while (actual != NULL) {
         Alien* alien = &actual->dato;
@@ -342,6 +530,18 @@ static void ActualizarProyectil(Proyectil* proyectil, NodoAlien** cabezaAliens, 
             return;
         }
         actual = actual->siguiente;
+    }
+
+    if (OvniActual.activo &&
+        proyectil->x >= OvniActual.x && proyectil->x <= OvniActual.x + 48 &&
+        proyectil->y >= OvniActual.y && proyectil->y <= OvniActual.y + 20) {
+        char mensaje[64];
+        snprintf(mensaje, sizeof(mensaje), "MATE_OVNI,%d", OvniActual.id);
+        EnviarLineaAlServidor(socket, mensaje);
+        canon->puntuacion += OvniActual.puntos;
+        OvniActual.activo = 0;
+        proyectil->activo = 0;
+        return;
     }
 }
 
@@ -418,6 +618,7 @@ int main(int argc, char* argv[]) {
     canon.puntuacion = 0;
 
     Proyectil proyectil = {0, 0, 8, 0};
+    InicializarBunkers();
 
     InitializeCriticalSection(&BloqueoEstado);
 
@@ -498,9 +699,9 @@ int main(int argc, char* argv[]) {
         }
 
         EnterCriticalSection(&BloqueoEstado);
-        ActualizarAliens(deltaTime);
+        ActualizarAliens(deltaTime, &canon, socketCliente);
         ActualizarProyectil(&proyectil, &cabezaListaAliens, socketCliente, &canon);
-        ActualizarDisparoAlien(deltaTime, &canon);
+        ActualizarDisparoAlien(deltaTime, &canon, socketCliente);
         LeaveCriticalSection(&BloqueoEstado);
 
         BeginDrawing();
@@ -518,6 +719,13 @@ int main(int argc, char* argv[]) {
         if (DisparoAlienActivo) {
             DrawRectangle(DisparoAlienX, DisparoAlienY, 4, 10, RED);
         }
+
+        if (OvniActual.activo) {
+            DrawRectangle(OvniActual.x, OvniActual.y, 48, 20, SKYBLUE);
+            DrawText(TextFormat("%d", OvniActual.puntos), OvniActual.x + 8, OvniActual.y - 14, 12, SKYBLUE);
+        }
+
+        DibujarBunkers();
 
         DrawRectangle(canon.x, canon.y, ANCHO_CANON, ALTO_CANON, GREEN);
         DrawText("spaCEinvaders", 10, 10, 20, LIGHTGRAY);
