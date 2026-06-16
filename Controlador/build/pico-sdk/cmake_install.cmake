@@ -1,8 +1,4 @@
-<<<<<<< Updated upstream
-# Install script for directory: C:/Users/sebas/.pico-sdk/sdk/2.2.0
-=======
 # Install script for directory: C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/pico-sdk
->>>>>>> Stashed changes
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -36,27 +32,9 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
   set(CMAKE_CROSSCOMPILING "TRUE")
 endif()
 
-# Set default install directory permissions.
+# Set path to fallback-tool for dependency-resolution.
 if(NOT DEFINED CMAKE_OBJDUMP)
-<<<<<<< Updated upstream
   set(CMAKE_OBJDUMP "C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/bin/arm-none-eabi-objdump.exe")
-endif()
-
-if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-  # Include the install script for the subdirectory.
-  include("C:/Users/sebas/source/repos/spaCEinvaders/Controlador/build/pico-sdk/tools/cmake_install.cmake")
-endif()
-
-if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-  # Include the install script for the subdirectory.
-  include("C:/Users/sebas/source/repos/spaCEinvaders/Controlador/build/pico-sdk/src/cmake_install.cmake")
-endif()
-
-if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-  # Include the install script for the subdirectory.
-  include("C:/Users/sebas/source/repos/spaCEinvaders/Controlador/build/pico-sdk/docs/cmake_install.cmake")
-=======
-  set(CMAKE_OBJDUMP "C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/gcc-arm-none-eabi/bin/arm-none-eabi-objdump.exe")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
@@ -65,6 +43,11 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("C:/Users/sebas/source/repos/spaCEinvaders/Controlador/build/pico-sdk/src/cmake_install.cmake")
   include("C:/Users/sebas/source/repos/spaCEinvaders/Controlador/build/pico-sdk/docs/cmake_install.cmake")
 
->>>>>>> Stashed changes
 endif()
 
+string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
+       "${CMAKE_INSTALL_MANIFEST_FILES}")
+if(CMAKE_INSTALL_LOCAL_ONLY)
+  file(WRITE "C:/Users/sebas/source/repos/spaCEinvaders/Controlador/build/pico-sdk/install_local_manifest.txt"
+     "${CMAKE_INSTALL_MANIFEST_CONTENT}")
+endif()

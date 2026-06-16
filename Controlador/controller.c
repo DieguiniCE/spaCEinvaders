@@ -40,6 +40,10 @@ int main(void) {
     stdio_init_all();
     gpio_setup();
 
+    for (int i = 0; i < 200 && !stdio_usb_connected(); i++) {
+        sleep_ms(10);
+    }
+
     sleep_ms(200);
 
     while (true) {
@@ -66,7 +70,7 @@ static void gpio_setup(void) {
 }
 
 static void send_command(char cmd) {
-    putchar_raw(cmd);
+    printf("%c", cmd);
     fflush(stdout);
     led_blink();
 }

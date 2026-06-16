@@ -16,19 +16,7 @@
 #define PTS_PULPO 40
 #define VELOCIDAD_CANON 5
 #define ANCHO_CANON 40
-<<<<<<< Updated upstream
-
-// Controlador fisico (Pico via USB-serial)
-#define UART_BAUD_RATE 115200
-#define PUERTO_SERIAL "COM3" // Ajustar segun el Administrador de dispositivos
-
-// Protocolo de comandos (1 byte ASCII, igual que Controlador/constants.h)
-#define CMD_LEFT 'L'
-#define CMD_RIGHT 'R'
-#define CMD_FIRE 'F'
-=======
 #define ALTO_CANON 20
->>>>>>> Stashed changes
 
 /* Controlador fisico (Pico via UART USB / CDC serial) */
 #define UART_BAUD_RATE 115200

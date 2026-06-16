@@ -137,7 +137,7 @@ public class server {
     }
 
     public static void main(String[] args) {
-        int puerto = 8080;
+        int puerto = 5000;
         if (args.length > 0) {
             puerto = Integer.parseInt(args[0]);
         }

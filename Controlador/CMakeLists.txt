@@ -23,10 +23,6 @@ else()
     set(PICO_SDK_PATH "C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/pico-sdk")
 endif()
 
-if(NOT CMAKE_MAKE_PROGRAM)
-    set(CMAKE_MAKE_PROGRAM "C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64/nmake.exe")
-endif()
-
 include(${PICO_SDK_PATH}/external/pico_sdk_import.cmake)
 
 project(spaceinvaders_controller C CXX ASM)
