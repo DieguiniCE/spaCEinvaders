@@ -61,6 +61,7 @@ public class server {
 
         System.out.println("Configuracion de sesiones aplicada segun el modo elegido.");
         System.out.println("Comandos en caliente: Crear X Y Pts | OVNI R 100 | Velocidad 100 | Bunkers 75");
+        System.out.println("Ejemplos: Crear 200 80 20 | OVNI R 100 | Velocidad 1.5 | Bunkers 75");
     }
 
     private void pedirModoJuego() throws IOException {

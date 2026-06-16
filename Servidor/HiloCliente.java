@@ -57,8 +57,6 @@ public class HiloCliente extends Thread implements Observadorsito {
 
             String mensaje;
             while ((mensaje = entrada.readLine()) != null && !mensaje.equals("Over")) {
-                System.out.println("Llego mensaje: " + mensaje);
-
                 String[] partesMensaje = mensaje.split(",");
                 String comando = partesMensaje[0];
 
@@ -146,7 +144,6 @@ public class HiloCliente extends Thread implements Observadorsito {
                         break;
 
                     default:
-                        System.out.println("Comando desconocido: " + comando);
                         break;
                 }
             }
@@ -157,7 +154,6 @@ public class HiloCliente extends Thread implements Observadorsito {
             }
             stream.close();
         } catch (IOException errorsito) {
-            System.out.println("Despiche general en el hilo: " + errorsito.getMessage());
             if (miJugador != null) {
                 miPartida.liberarJugador(miJugador);
             }
