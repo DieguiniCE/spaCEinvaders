@@ -28,7 +28,7 @@ public class Cliente {
             return;
         }
 
-        String mensaje = ""; //hacemos la variable mensaje
+        String mensaje = "Hola server"; //hacemos la variable mensaje
 
         while (!mensaje.equals("Over")){
             try {
