@@ -4,10 +4,7 @@ import java.io.*;
 
 public class server {
 
-    private Socket stream = null;
     private ServerSocket streamServidor = null;
-    private DataInputStream entrada = null;
-	private DataOutputStream salida = null;
 
     public server(int port) {
         //esto es para conectarse
@@ -15,58 +12,30 @@ public class server {
         {
             streamServidor = new ServerSocket(port);
             System.out.println("Conectado");
+            System.out.println("Esperando conexiones");
 
-            System.out.println("Esperando conexion");
+            //hacemos un ciclo infinito para que el servidor siempre escuche
+            while (true) 
+            {
+                //el servidor se queda esperando acá hasta que alguien se conecte
+                Socket stream = streamServidor.accept();
+                System.out.println("Cliente aceptado");
 
-            stream = streamServidor.accept();
-            System.out.println("Cliente aceptado");
-
-            // agarra lo quue le mande el cliente
-            entrada = new DataInputStream(new BufferedInputStream(stream.getInputStream()));
-            salida = new DataOutputStream(stream.getOutputStream());
+                //cuando alguien se conecta, creamos un hilo para ese cliente
+                //y le pasamos el socket (stream) que acaba de conectarse
+                HiloCliente nuevoCliente = new HiloCliente(stream);
+                
+                //iniciamos el hilo para que trabaje en paralelo
+                nuevoCliente.start(); 
+            }
 		}
-
-		catch (UnknownHostException error) { //acá agarra los errores raros
-				System.out.println(error);
-				return;
-        }
         catch (IOException errorsito){ //acá agarra los errores de entrada y salida
 				System.out.println(errorsito);
 				return;
 		}
-
-        String mensaje = ""; //hacemos la variable mensaje
-
-        while (!mensaje.equals("Over"))
-        {
-            try
-            {
-                mensaje = entrada.readUTF();
-				salida.writeUTF(mensaje);
-                System.out.println(mensaje);
-				}
-            catch (IOException errorsito2)
-            {
-				System.out.println(errorsito2);
-            }
-			}
-
-        System.out.println("Cerrando conexion");
-
-        // Cerrar conexión
-        try
-        {
-            stream.close();
-            streamServidor.close();
-        }
-        catch(IOException error)
-        {
-            System.out.println(error);
-        }
     }
 
-	public static  void main(String[] args) {
+	public static void main(String[] args) {
         server c = new server(5000);
+    }
 }
-}
-

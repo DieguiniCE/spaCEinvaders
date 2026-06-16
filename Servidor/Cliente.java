@@ -38,7 +38,7 @@ public class Cliente {
                 System.out.println(errorsito2);
             }
         }
-
+  
         //esto es para desconectarse
         try {
             entrada.close();
