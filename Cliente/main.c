@@ -69,16 +69,16 @@ static int DisparoAlienVelocidad = 0;
 static unsigned int UltimoDisparoAlienMs = 0;
 
 static void InicializarBunkers(void) {
-    int posicionesX[4] = {120, 275, 430, 585};
-    for (int i = 0; i < 4; i++) {
+    int posicionesX[BUNKER_CANTIDAD] = {BUNKER_POS_0, BUNKER_POS_1, BUNKER_POS_2, BUNKER_POS_3};
+    for (int i = 0; i < BUNKER_CANTIDAD; i++) {
         Bunkers[i].x = posicionesX[i];
-        Bunkers[i].y = ALTO_PANTALLA - 150;
-        Bunkers[i].vida = 100;
+        Bunkers[i].y = ALTO_PANTALLA - BUNKER_Y_OFFSET;
+        Bunkers[i].vida = BUNKER_LIFE_INICIAL;
     }
 }
 
 static void ActualizarBunkersDesdeTexto(const char* texto) {
-    int vida0 = 100, vida1 = 100, vida2 = 100, vida3 = 100;
+    int vida0 = BUNKER_LIFE_INICIAL, vida1 = BUNKER_LIFE_INICIAL, vida2 = BUNKER_LIFE_INICIAL, vida3 = BUNKER_LIFE_INICIAL;
     if (sscanf(texto, "%d,%d,%d,%d", &vida0, &vida1, &vida2, &vida3) == 4) {
         Bunkers[0].vida = vida0;
         Bunkers[1].vida = vida1;
@@ -93,13 +93,13 @@ static void ActualizarBunkersDesdeTexto(const char* texto) {
 }
 
 static int HitBunker(int x, int y, int ancho, int alto) {
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < BUNKER_CANTIDAD; i++) {
         if (Bunkers[i].vida <= 0) {
             continue;
         }
 
-        if (x < Bunkers[i].x + 60 && x + ancho > Bunkers[i].x &&
-            y < Bunkers[i].y + 35 && y + alto > Bunkers[i].y) {
+        if (x < Bunkers[i].x + BUNKER_ANCHO && x + ancho > Bunkers[i].x &&
+            y < Bunkers[i].y + BUNKER_ALTO && y + alto > Bunkers[i].y) {
             return i;
         }
     }
@@ -108,7 +108,7 @@ static int HitBunker(int x, int y, int ancho, int alto) {
 }
 
 static void DañarBunkerLocal(int indice, int dano) {
-    if (indice < 0 || indice >= 4 || Bunkers[indice].vida <= 0) {
+    if (indice < 0 || indice >= BUNKER_CANTIDAD || Bunkers[indice].vida <= 0) {
         return;
     }
 
@@ -119,18 +119,18 @@ static void DañarBunkerLocal(int indice, int dano) {
 }
 
 static void DibujarBunkers(void) {
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < BUNKER_CANTIDAD; i++) {
         if (Bunkers[i].vida <= 0) {
             continue;
         }
 
         Color color = DARKGREEN;
-        if (Bunkers[i].vida < 75) color = GREEN;
-        if (Bunkers[i].vida < 50) color = LIME;
-        if (Bunkers[i].vida < 25) color = YELLOW;
+        if (Bunkers[i].vida < BUNKER_LIFE_ALTA) color = GREEN;
+        if (Bunkers[i].vida < BUNKER_LIFE_MEDIA) color = LIME;
+        if (Bunkers[i].vida < BUNKER_LIFE_BAJA) color = YELLOW;
 
-        DrawRectangle(Bunkers[i].x, Bunkers[i].y, 60, 35, color);
-        DrawRectangleLines(Bunkers[i].x, Bunkers[i].y, 60, 35, DARKGRAY);
+        DrawRectangle(Bunkers[i].x, Bunkers[i].y, BUNKER_ANCHO, BUNKER_ALTO, color);
+        DrawRectangleLines(Bunkers[i].x, Bunkers[i].y, BUNKER_ANCHO, BUNKER_ALTO, DARKGRAY);
     }
 }
 
@@ -139,7 +139,7 @@ static void EnviarLineaAlServidor(SOCKET socketServidor, const char* mensaje) {
         return;
     }
 
-    char buffer[256];
+    char buffer[BUFFER_ENVIO];
     int len = snprintf(buffer, sizeof(buffer), "%s\n", mensaje);
     send(socketServidor, buffer, len, 0);
 }
@@ -172,9 +172,9 @@ static void AplicarComandoLocal(nave* canon, Proyectil* proyectil, char comando)
             break;
         case CMD_FIRE:
             if (!proyectil->activo) {
-                proyectil->x = canon->x + ANCHO_CANON / 2 - 2;
-                proyectil->y = canon->y - 10;
-                proyectil->velocidad = 8;
+                proyectil->x = canon->x + ANCHO_CANON / 2 - (PROYECTIL_ANCHO / 2);
+                proyectil->y = canon->y - PROYECTIL_JUGADOR_Y_OFFSET;
+                proyectil->velocidad = VELOCIDAD_PROYECTIL_JUGADOR;
                 proyectil->activo = 1;
             }
             break;
@@ -203,9 +203,9 @@ static void CrearOleadaAliens(void) {
             puntos = PTS_CANGREJO;
         }
 
-        for (int columna = 0; columna < 10; columna++) {
-            int x = 100 + (columna * 48);
-            int y = 60 + (fila * 34);
+        for (int columna = 0; columna < ALIEN_COLUMNAS; columna++) {
+            int x = ALIEN_X_INICIAL + (columna * ALIEN_X_SEPARACION);
+            int y = ALIEN_Y_INICIAL + (fila * ALIEN_Y_SEPARACION);
             cabezaListaAliens = agregar_alien(cabezaListaAliens, siguienteId++, x, y, tipo, puntos);
         }
     }
@@ -233,17 +233,17 @@ static void ActualizarAliens(float deltaTime, nave* canon, SOCKET socketServidor
     }
 
     int golpeaBorde = 0;
-    if (DireccionAliens > 0 && maxX + 30 + paso >= ANCHO_PANTALLA - 20) {
+    if (DireccionAliens > 0 && maxX + ALIEN_ANCHO + paso >= ANCHO_PANTALLA - ALIEN_MARGEN_BORDE) {
         golpeaBorde = 1;
     }
-    if (DireccionAliens < 0 && minX - paso <= 20) {
+    if (DireccionAliens < 0 && minX - paso <= ALIEN_MARGEN_BORDE) {
         golpeaBorde = 1;
     }
 
     if (golpeaBorde) {
         DireccionAliens *= -1;
         for (NodoAlien* nodo = cabezaListaAliens; nodo != NULL; nodo = nodo->siguiente) {
-            nodo->dato.y += 16;
+            nodo->dato.y += ALIEN_DESCENSO;
         }
     } else {
         for (NodoAlien* nodo = cabezaListaAliens; nodo != NULL; nodo = nodo->siguiente) {
@@ -256,15 +256,15 @@ static void ActualizarAliens(float deltaTime, nave* canon, SOCKET socketServidor
         NodoAlien* nodo = *enlaceActual;
         int alienX = nodo->dato.x;
         int alienY = nodo->dato.y;
-        int alienAncho = 30;
-        int alienAlto = 20;
+        int alienAncho = ALIEN_ANCHO;
+        int alienAlto = ALIEN_ALTO;
         int alienCayoEnJugador = (alienY + alienAlto >= canon->y && alienX < canon->x + ANCHO_CANON && alienX + alienAncho > canon->x);
 
         int bunkerImpactado = HitBunker(alienX, alienY, alienAncho, alienAlto);
         if (bunkerImpactado >= 0) {
-            DañarBunkerLocal(bunkerImpactado, 20);
-            char mensajeBunker[64];
-            snprintf(mensajeBunker, sizeof(mensajeBunker), "BUNKER_HIT,%d,%d", bunkerImpactado, 20);
+            DañarBunkerLocal(bunkerImpactado, TASA_DISPARO_BUNKER_JUGADOR);
+            char mensajeBunker[BUFFER_MENSAJE];
+            snprintf(mensajeBunker, sizeof(mensajeBunker), "BUNKER_HIT,%d,%d", bunkerImpactado, TASA_DISPARO_BUNKER_JUGADOR);
             EnviarLineaAlServidor(socketServidor, mensajeBunker);
             *enlaceActual = nodo->siguiente;
             free(nodo);
@@ -310,9 +310,9 @@ static void ActualizarDisparoAlien(float deltaTime, nave* canon, SOCKET socketSe
         } else {
             int bunkerImpactado = HitBunker(DisparoAlienX, DisparoAlienY, 4, 10);
             if (bunkerImpactado >= 0) {
-                DañarBunkerLocal(bunkerImpactado, 10);
-                char mensaje[64];
-                snprintf(mensaje, sizeof(mensaje), "BUNKER_HIT,%d,%d", bunkerImpactado, 10);
+                DañarBunkerLocal(bunkerImpactado, TASA_DISPARO_BUNKER_ALIEN);
+                char mensaje[BUFFER_MENSAJE];
+                snprintf(mensaje, sizeof(mensaje), "BUNKER_HIT,%d,%d", bunkerImpactado, TASA_DISPARO_BUNKER_ALIEN);
                 EnviarLineaAlServidor(socketServidor, mensaje);
                 DisparoAlienActivo = 0;
                 return;
@@ -337,17 +337,17 @@ static void ActualizarDisparoAlien(float deltaTime, nave* canon, SOCKET socketSe
     }
 
     unsigned int ahoraMs = (unsigned int)(GetTime() * 1000.0);
-    if (ahoraMs - UltimoDisparoAlienMs < 900) {
+    if (ahoraMs - UltimoDisparoAlienMs < INTERVALO_DISPARO_ALIEN_MS) {
         return;
     }
 
-    int columnaObjetivo = rand() % 10;
+    int columnaObjetivo = rand() % ALIEN_COLUMNAS;
     NodoAlien* atacante = AlienMasBajoPorColumna(columnaObjetivo);
     if (atacante != NULL) {
         DisparoAlienActivo = 1;
-        DisparoAlienX = atacante->dato.x + 12;
-        DisparoAlienY = atacante->dato.y + 20;
-        DisparoAlienVelocidad = 6;
+        DisparoAlienX = atacante->dato.x + PROYECTIL_ALIEN_X_OFFSET;
+        DisparoAlienY = atacante->dato.y + PROYECTIL_ALIEN_Y_OFFSET;
+        DisparoAlienVelocidad = VELOCIDAD_DISPARO_ALIEN;
         UltimoDisparoAlienMs = ahoraMs;
     }
 }

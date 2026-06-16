@@ -1229,9 +1229,9 @@ Discarded input sections
  .comment       0x00000000       0x46 CMakeFiles/spaceinvaders_controller.dir/C_/Program_Files/Raspberry_Pi/Pico_SDK_v1.5.1/pico-sdk/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/rp2040_usb_device_enumeration.c.obj
  .ARM.attributes
                 0x00000000       0x2c CMakeFiles/spaceinvaders_controller.dir/C_/Program_Files/Raspberry_Pi/Pico_SDK_v1.5.1/pico-sdk/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/rp2040_usb_device_enumeration.c.obj
- .text          0x00000000        0x0 C:\Users\sebas\AppData\Local\Temp\ccoY9t3R.o
- .data          0x00000000        0x0 C:\Users\sebas\AppData\Local\Temp\ccoY9t3R.o
- .bss           0x00000000        0x0 C:\Users\sebas\AppData\Local\Temp\ccoY9t3R.o
+ .text          0x00000000        0x0 C:\Users\sebas\AppData\Local\Temp\ccy3FVi6.o
+ .data          0x00000000        0x0 C:\Users\sebas\AppData\Local\Temp\ccy3FVi6.o
+ .bss           0x00000000        0x0 C:\Users\sebas\AppData\Local\Temp\ccy3FVi6.o
  .data          0x00000000        0x0 C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/bin/../lib/gcc/arm-none-eabi/14.2.1/thumb/v6-m/nofp\libgcc.a(_dvmd_tls.o)
  .bss           0x00000000        0x0 C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/bin/../lib/gcc/arm-none-eabi/14.2.1/thumb/v6-m/nofp\libgcc.a(_dvmd_tls.o)
  .text          0x00000000        0x0 C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/bin/../lib/gcc/arm-none-eabi/14.2.1/thumb/v6-m/nofp\libc.a(libc_a-calloc.o)
@@ -1423,7 +1423,7 @@ LOAD C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/bin/../lib/gcc/arm-none-eabi/1
 .boot2          0x10000000      0x100
                 0x10000000                        __boot2_start__ = .
  *(.boot2)
- .boot2         0x10000000      0x100 C:\Users\sebas\AppData\Local\Temp\ccoY9t3R.o
+ .boot2         0x10000000      0x100 C:\Users\sebas\AppData\Local\Temp\ccy3FVi6.o
                 0x10000100                        __boot2_end__ = .
                 0x00000001                        ASSERT (((__boot2_end__ - __boot2_start__) == 0x100), ERROR: Pico second stage bootloader must be 256 bytes in size)
 
@@ -2585,7 +2585,7 @@ LOAD CMakeFiles/spaceinvaders_controller.dir/C_/Program_Files/Raspberry_Pi/Pico_
 LOAD CMakeFiles/spaceinvaders_controller.dir/C_/Program_Files/Raspberry_Pi/Pico_SDK_v1.5.1/pico-sdk/lib/tinyusb/src/tusb.c.obj
 LOAD CMakeFiles/spaceinvaders_controller.dir/C_/Program_Files/Raspberry_Pi/Pico_SDK_v1.5.1/pico-sdk/lib/tinyusb/src/common/tusb_fifo.c.obj
 LOAD CMakeFiles/spaceinvaders_controller.dir/C_/Program_Files/Raspberry_Pi/Pico_SDK_v1.5.1/pico-sdk/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/rp2040_usb_device_enumeration.c.obj
-LOAD C:\Users\sebas\AppData\Local\Temp\ccoY9t3R.o
+LOAD C:\Users\sebas\AppData\Local\Temp\ccy3FVi6.o
 LOAD C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/bin/../lib/gcc/arm-none-eabi/14.2.1/thumb/v6-m/nofp\libstdc++.a
 LOAD C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/bin/../lib/gcc/arm-none-eabi/14.2.1/thumb/v6-m/nofp\libm.a
 START GROUP
@@ -2699,7 +2699,7 @@ LOAD linker stubs
  .ARM.attributes
                 0x00000776       0x2c CMakeFiles/spaceinvaders_controller.dir/C_/Program_Files/Raspberry_Pi/Pico_SDK_v1.5.1/pico-sdk/lib/tinyusb/src/common/tusb_fifo.c.obj
  .ARM.attributes
-                0x000007a2       0x22 C:\Users\sebas\AppData\Local\Temp\ccoY9t3R.o
+                0x000007a2       0x22 C:\Users\sebas\AppData\Local\Temp\ccy3FVi6.o
  .ARM.attributes
                 0x000007c4       0x1e C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/bin/../lib/gcc/arm-none-eabi/14.2.1/thumb/v6-m/nofp\libgcc.a(_dvmd_tls.o)
  .ARM.attributes

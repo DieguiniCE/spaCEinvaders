@@ -379,7 +379,9 @@ public class Partida {
 
     private void agregarAlienInterno(int x, int y, int puntos) {
         int tipo = tipoDesdePuntos(puntos);
-        EstadoAlien alien = new EstadoAlien(++contadorAliens, x, y, tipo, puntos);
+        String nombreTipo = tipo == 3 ? "pulpo" : (tipo == 2 ? "cangrejo" : "calamar");
+        enemigo alienBase = enemigoFactory.nuevoEnemigo(nombreTipo, x, y);
+        EstadoAlien alien = new EstadoAlien(++contadorAliens, alienBase.getposX(), alienBase.getposY(), tipo, alienBase.getPuntos());
         listaAliens.add(alien);
     }
 

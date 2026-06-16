@@ -15,4 +15,8 @@ public class enemigo extends individuo implements ataque{
     public String getID(){
         return this.ID;
     }
+
+    public int getPuntos(){
+        return this.puntos;
+    }
 }

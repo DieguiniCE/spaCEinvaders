@@ -10,9 +10,6 @@ import java.util.ArrayList;
 
 public class server {
 
-    private static final int ANCHO_PANTALLA = 800;
-    private static final int ALTO_PANTALLA = 600;
-
     private final ServerSocket streamServidor;
     private final ArrayList<Partida> partidasActivas;
     private int contadorPartidas;

@@ -40,16 +40,16 @@ int main(void) {
     stdio_init_all();
     gpio_setup();
 
-    for (int i = 0; i < 200 && !stdio_usb_connected(); i++) {
-        sleep_ms(10);
+    for (int i = 0; i < USB_WAIT_ATTEMPTS && !stdio_usb_connected(); i++) {
+        sleep_ms(USB_WAIT_STEP_MS);
     }
 
-    sleep_ms(200);
+    sleep_ms(USB_STARTUP_STABILIZE_MS);
 
     while (true) {
         handle_move_button();
         handle_fire_button();
-        sleep_ms(10);
+        sleep_ms(MAIN_LOOP_SLEEP_MS);
     }
 
     return 0;

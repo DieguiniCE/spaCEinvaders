@@ -44,23 +44,23 @@ typedef struct {
 static EstadoJugador Jugador1 = {0, 0, ALTO_PANTALLA - 50, 3, 0};
 static EstadoJugador Jugador2 = {0, 0, ALTO_PANTALLA - 50, 3, 0};
 static NodoAlien* CabezaAliens = NULL;
-static char TextoBunkers[32] = "100%";
+static char TextoBunkers[BUFFER_BUNKERS] = BUNKER_TEXTO_INICIAL;
 static double VelocidadAliens = 1.0;
 static BunkerLocal Bunkers[4];
 static OvniLocal OvniActual = {0, 0, 0, 0, 0, 0};
 static CRITICAL_SECTION BloqueoEstado;
 
 static void InicializarBunkers(void) {
-    int posicionesX[4] = {120, 275, 430, 585};
-    for (int i = 0; i < 4; i++) {
+    int posicionesX[BUNKER_CANTIDAD] = {BUNKER_POS_0, BUNKER_POS_1, BUNKER_POS_2, BUNKER_POS_3};
+    for (int i = 0; i < BUNKER_CANTIDAD; i++) {
         Bunkers[i].x = posicionesX[i];
-        Bunkers[i].y = ALTO_PANTALLA - 150;
-        Bunkers[i].vida = 100;
+        Bunkers[i].y = ALTO_PANTALLA - BUNKER_Y_OFFSET;
+        Bunkers[i].vida = BUNKER_LIFE_INICIAL;
     }
 }
 
 static void ActualizarBunkersDesdeTexto(const char* texto) {
-    int vida0 = 100, vida1 = 100, vida2 = 100, vida3 = 100;
+    int vida0 = BUNKER_LIFE_INICIAL, vida1 = BUNKER_LIFE_INICIAL, vida2 = BUNKER_LIFE_INICIAL, vida3 = BUNKER_LIFE_INICIAL;
     if (sscanf(texto, "%d,%d,%d,%d", &vida0, &vida1, &vida2, &vida3) == 4) {
         Bunkers[0].vida = vida0;
         Bunkers[1].vida = vida1;
@@ -75,18 +75,18 @@ static void ActualizarBunkersDesdeTexto(const char* texto) {
 }
 
 static void DibujarBunkers(void) {
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < BUNKER_CANTIDAD; i++) {
         if (Bunkers[i].vida <= 0) {
             continue;
         }
 
         Color color = DARKGREEN;
-        if (Bunkers[i].vida < 75) color = GREEN;
-        if (Bunkers[i].vida < 50) color = LIME;
-        if (Bunkers[i].vida < 25) color = YELLOW;
+        if (Bunkers[i].vida < BUNKER_LIFE_ALTA) color = GREEN;
+        if (Bunkers[i].vida < BUNKER_LIFE_MEDIA) color = LIME;
+        if (Bunkers[i].vida < BUNKER_LIFE_BAJA) color = YELLOW;
 
-        DrawRectangle(Bunkers[i].x, Bunkers[i].y, 60, 35, color);
-        DrawRectangleLines(Bunkers[i].x, Bunkers[i].y, 60, 35, DARKGRAY);
+        DrawRectangle(Bunkers[i].x, Bunkers[i].y, BUNKER_ANCHO, BUNKER_ALTO, color);
+        DrawRectangleLines(Bunkers[i].x, Bunkers[i].y, BUNKER_ANCHO, BUNKER_ALTO, DARKGRAY);
     }
 }
 

@@ -57,13 +57,12 @@ public class HiloCliente extends Thread implements Observadorsito {
 
             String mensaje;
             while ((mensaje = entrada.readLine()) != null && !mensaje.equals("Over")) {
-                String[] partesMensaje = mensaje.split(",");
-                String comando = partesMensaje[0];
+                MensajeJuegoAdapter mensajeAdapter = new MensajeJuegoAdapter(mensaje);
 
-                switch (comando) {
+                switch (mensajeAdapter.comando()) {
                     case "MOVER":
-                        if (esJugador && partesMensaje.length > 1) {
-                            miPartida.moverJugador(miJugador, partesMensaje[1]);
+                        if (esJugador && mensajeAdapter.tienePartes(2)) {
+                            miPartida.moverJugador(miJugador, mensajeAdapter.parte(1));
                         }
                         break;
 
@@ -74,10 +73,10 @@ public class HiloCliente extends Thread implements Observadorsito {
                         break;
 
                     case "MATE_ALIEN":
-                        if (esJugador && partesMensaje.length > 2) {
+                        if (esJugador && mensajeAdapter.tienePartes(3)) {
                             try {
-                                int idAlien = Integer.parseInt(partesMensaje[1]);
-                                miPartida.alienEliminado(miJugador, idAlien, partesMensaje[2]);
+                                int idAlien = Integer.parseInt(mensajeAdapter.parte(1));
+                                miPartida.alienEliminado(miJugador, idAlien, mensajeAdapter.parte(2));
                             } catch (NumberFormatException errorAlien) {
                                 System.out.println("Alien invalido: " + errorAlien.getMessage());
                             }
@@ -85,9 +84,9 @@ public class HiloCliente extends Thread implements Observadorsito {
                         break;
 
                     case "MATE_OVNI":
-                        if (esJugador && partesMensaje.length > 1) {
+                        if (esJugador && mensajeAdapter.tienePartes(2)) {
                             try {
-                                int idOvni = Integer.parseInt(partesMensaje[1]);
+                                int idOvni = Integer.parseInt(mensajeAdapter.parte(1));
                                 miPartida.ovniEliminado(miJugador, idOvni);
                             } catch (NumberFormatException errorOvni) {
                                 System.out.println("OVNI invalido: " + errorOvni.getMessage());
@@ -96,10 +95,10 @@ public class HiloCliente extends Thread implements Observadorsito {
                         break;
 
                     case "BUNKER_HIT":
-                        if (partesMensaje.length > 2) {
+                        if (mensajeAdapter.tienePartes(3)) {
                             try {
-                                int indiceBunker = Integer.parseInt(partesMensaje[1]);
-                                int dano = Integer.parseInt(partesMensaje[2]);
+                                int indiceBunker = Integer.parseInt(mensajeAdapter.parte(1));
+                                int dano = Integer.parseInt(mensajeAdapter.parte(2));
                                 miPartida.bunkerGolpeado(indiceBunker, dano);
                             } catch (NumberFormatException errorBunker) {
                                 System.out.println("Bunker invalido: " + errorBunker.getMessage());
@@ -120,26 +119,26 @@ public class HiloCliente extends Thread implements Observadorsito {
                         break;
 
                     case "Crear":
-                        if (partesMensaje.length >= 4) {
-                            miPartida.adminCrearAlien(partesMensaje[1], partesMensaje[2], partesMensaje[3]);
+                        if (mensajeAdapter.tienePartes(4)) {
+                            miPartida.adminCrearAlien(mensajeAdapter.parte(1), mensajeAdapter.parte(2), mensajeAdapter.parte(3));
                         }
                         break;
 
                     case "OVNI":
-                        if (partesMensaje.length >= 3) {
-                            miPartida.adminCrearOvni(partesMensaje[1], partesMensaje[2]);
+                        if (mensajeAdapter.tienePartes(3)) {
+                            miPartida.adminCrearOvni(mensajeAdapter.parte(1), mensajeAdapter.parte(2));
                         }
                         break;
 
                     case "Velocidad":
-                        if (partesMensaje.length >= 2) {
-                            miPartida.adminVelocidad(partesMensaje[1]);
+                        if (mensajeAdapter.tienePartes(2)) {
+                            miPartida.adminVelocidad(mensajeAdapter.parte(1));
                         }
                         break;
 
                     case "Bunkers":
-                        if (partesMensaje.length >= 2) {
-                            miPartida.adminBunkers(partesMensaje[1]);
+                        if (mensajeAdapter.tienePartes(2)) {
+                            miPartida.adminBunkers(mensajeAdapter.parte(1));
                         }
                         break;
 
