@@ -1,138 +1,119 @@
 package Servidor;
-import java.net.*;
-import java.io.*;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 public class server {
 
     private static final int ANCHO_PANTALLA = 800;
     private static final int ALTO_PANTALLA = 600;
-    private static final int ANCHO_CANON = 40;
-    private static final int VELOCIDAD_CANON = 5;
 
-    private Socket stream = null;
-
-    private ServerSocket streamServidor = null;
-    private InputStream entrada = null;
-    private OutputStream salida = null;
-    private jugador jugador1;
+    private final Partida partida;
+    private final ServerSocket streamServidor;
+    private int jugadoresAsignados;
 
     public server(int port) {
-        jugador1 = new jugador(ANCHO_PANTALLA / 2, ALTO_PANTALLA - 50, 3, 1);
+        this.partida = new Partida();
+        this.jugadoresAsignados = 0;
 
-        try
-        {
-            streamServidor = new ServerSocket(port);
+        try {
+            this.streamServidor = new ServerSocket(port);
             System.out.println("Servidor spaCEinvaders escuchando en puerto " + port);
+            this.partida.inicializarOleadaDefecto();
 
-            System.out.println("Esperando conexion");
+            Thread consolaAdmin = new Thread(this::leerComandosAdmin, "AdminConsole");
+            consolaAdmin.setDaemon(true);
+            consolaAdmin.start();
 
-            stream = streamServidor.accept();
-            System.out.println("Cliente aceptado");
-
-            entrada = stream.getInputStream();
-            salida = stream.getOutputStream();
-
-            enviarEstado();
-        }
-        catch (UnknownHostException error) {
+            aceptarClientes();
+        } catch (IOException error) {
             System.out.println(error);
-            return;
+            throw new RuntimeException(error);
         }
-        catch (IOException errorsito){
-            System.out.println(errorsito);
-            return;
+    }
+
+    private void aceptarClientes() {
+        while (true) {
+            try {
+                Socket stream = streamServidor.accept();
+                boolean esJugador = jugadoresAsignados < 2;
+                jugador jugadorAsignado = null;
+
+                if (esJugador) {
+                    jugadoresAsignados += 1;
+                    jugadorAsignado = partida.crearJugador(jugadoresAsignados);
+                    partida.agregarJugador(jugadorAsignado);
+                    System.out.println("Jugador " + jugadoresAsignados + " conectado desde " + stream.getRemoteSocketAddress());
+                } else {
+                    System.out.println("Espectador conectado desde " + stream.getRemoteSocketAddress());
+                }
+
+                HiloCliente hiloCliente = new HiloCliente(stream, esJugador, partida, jugadorAsignado);
+                hiloCliente.start();
+            } catch (IOException errorConexion) {
+                System.out.println("Error aceptando cliente: " + errorConexion.getMessage());
+                break;
+            }
         }
+    }
 
-        int comando;
+    private void leerComandosAdmin() {
+        BufferedReader entrada = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
 
-        while (true)
-        {
-            try
-            {
-                comando = entrada.read();
-                if (comando == -1) {
+        while (true) {
+            try {
+                String linea = entrada.readLine();
+                if (linea == null) {
                     break;
                 }
 
-                procesarComando((char) comando);
-                enviarEstado();
-            }
-            catch (IOException errorsito2)
-            {
-                System.out.println(errorsito2);
+                String comando = linea.trim();
+                if (comando.isEmpty()) {
+                    continue;
+                }
+
+                String[] partes = comando.split("\\s+");
+                switch (partes[0].toLowerCase()) {
+                    case "crear":
+                        if (partes.length >= 4) {
+                            partida.adminCrearAlien(partes[1], partes[2], partes[3]);
+                        } else {
+                            System.out.println("Uso: Crear X Y Pts");
+                        }
+                        break;
+                    case "ovni":
+                        if (partes.length >= 3) {
+                            partida.adminCrearOvni(partes[1], partes[2]);
+                        } else {
+                            System.out.println("Uso: OVNI direccion puntos");
+                        }
+                        break;
+                    case "velocidad":
+                        if (partes.length >= 2) {
+                            partida.adminVelocidad(partes[1]);
+                        } else {
+                            System.out.println("Uso: Velocidad valor");
+                        }
+                        break;
+                    case "bunkers":
+                        if (partes.length >= 2) {
+                            partida.adminBunkers(partes[1]);
+                        } else {
+                            System.out.println("Uso: Bunkers porcentaje");
+                        }
+                        break;
+                    default:
+                        System.out.println("Comandos: Crear, OVNI, Velocidad, Bunkers");
+                        break;
+                }
+            } catch (IOException errorAdmin) {
+                System.out.println("Error leyendo admin: " + errorAdmin.getMessage());
                 break;
             }
-        }
-
-        System.out.println("Cerrando conexion");
-
-        try
-        {
-            stream.close();
-            streamServidor.close();
-
-        }
-        catch (IOException errorsito) { 
-            System.out.println("Murió el servidor: " + errorsito.getMessage());
-            return;
-        }
-    }
-
-    private void procesarComando(char comando) {
-        switch (comando) {
-            case 'L':
-                jugador1.desplazamiento(-VELOCIDAD_CANON, 0);
-                System.out.println("Comando: izquierda");
-                break;
-            case 'R':
-                jugador1.desplazamiento(VELOCIDAD_CANON, 0);
-                System.out.println("Comando: derecha");
-                break;
-            case 'F':
-                jugador1.disparo();
-                System.out.println("Comando: disparo");
-                break;
-            default:
-                System.out.println("Comando desconocido: " + comando);
-                break;
-        }
-
-        limitarPosicionJugador();
-    }
-
-    private void limitarPosicionJugador() {
-        int x = jugador1.getposX();
-        int y = jugador1.getposY();
-
-        if (x < 0) {
-            x = 0;
-        }
-        if (x > ANCHO_PANTALLA - ANCHO_CANON) {
-            x = ANCHO_PANTALLA - ANCHO_CANON;
-        }
-        if (y < 0) {
-            y = 0;
-        }
-        if (y > ALTO_PANTALLA - 20) {
-            y = ALTO_PANTALLA - 20;
-        }
-
-        jugador1.establecerPosicion(x, y);
-    }
-
-    private void enviarEstado() {
-        try {
-            String mensaje = String.format(
-                "STATE:%d,%d,%d,%d\n",
-                jugador1.getposX(),
-                jugador1.getposY(),
-                jugador1.getVidas(),
-                jugador1.getPuntos()
-            );
-            salida.write(mensaje.getBytes("UTF-8"));
-            salida.flush();
-        } catch (IOException error) {
-            System.out.println(error);
         }
     }
 
@@ -141,6 +122,6 @@ public class server {
         if (args.length > 0) {
             puerto = Integer.parseInt(args[0]);
         }
-        server c = new server(puerto);
+        new server(puerto);
     }
 }

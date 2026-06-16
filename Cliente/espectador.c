@@ -54,7 +54,12 @@ static void ProcesarLineaEspectador(const char* linea) {
 
     if (sscanf(linea, "NUEVO_ALIEN,%d,%d,%d,%d", &idAlien, &x, &y, &ptsAlien) == 4) {
         int tipo = (ptsAlien >= 40) ? 3 : ((ptsAlien >= 20) ? 2 : 1);
-        CabezaAliens = agregar_alien(CabezaAliens, idAlien, x * 50, y * 40, tipo, ptsAlien);
+        CabezaAliens = agregar_alien(CabezaAliens, idAlien, x, y, tipo, ptsAlien);
+        return;
+    }
+
+    if (sscanf(linea, "BORRAR_ALIEN,%d", &idAlien) == 1) {
+        CabezaAliens = eliminar_alien(CabezaAliens, idAlien);
         return;
     }
 

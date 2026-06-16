@@ -280,7 +280,12 @@ static void ProcesarMensajeServidor(
     }
 
     if (sscanf(mensaje, "NUEVO_ALIEN,%d,%d,%d,%d", &idAlien, &x, &y, &ptsAlien) == 4) {
-        *cabezaAliens = agregar_alien(*cabezaAliens, idAlien, x * 50, y * 40, TipoDesdePuntos(ptsAlien), ptsAlien);
+        *cabezaAliens = agregar_alien(*cabezaAliens, idAlien, x, y, TipoDesdePuntos(ptsAlien), ptsAlien);
+        return;
+    }
+
+    if (sscanf(mensaje, "BORRAR_ALIEN,%d", &idAlien) == 1) {
+        *cabezaAliens = eliminar_alien(*cabezaAliens, idAlien);
         return;
     }
 
@@ -327,7 +332,7 @@ static void ActualizarProyectil(Proyectil* proyectil, NodoAlien** cabezaAliens, 
             if (alien->tipo == 2) tipo = "cangrejo";
             else if (alien->tipo == 3) tipo = "pulpo";
 
-            snprintf(mensaje, sizeof(mensaje), "MATE_ALIEN,%s", tipo);
+            snprintf(mensaje, sizeof(mensaje), "MATE_ALIEN,%d,%s", alien->id, tipo);
             EnviarLineaAlServidor(socket, mensaje);
 
             canon->puntuacion += alien->puntos;
@@ -413,7 +418,6 @@ int main(int argc, char* argv[]) {
     canon.puntuacion = 0;
 
     Proyectil proyectil = {0, 0, 8, 0};
-    CrearOleadaAliens();
 
     InitializeCriticalSection(&BloqueoEstado);
 
@@ -432,6 +436,10 @@ int main(int argc, char* argv[]) {
     } else {
         printf("Conectado al servidor en %s:%d\n", IP_SERVIDOR, PUERTO_SERVIDOR);
         ServidorConectado = 1;
+    }
+
+    if (!ServidorConectado) {
+        CrearOleadaAliens();
     }
 
     ContextoServidor contextoServidor = {

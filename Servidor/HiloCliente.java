@@ -61,8 +61,13 @@ public class HiloCliente extends Thread implements Observadorsito {
                         break;
 
                     case "MATE_ALIEN":
-                        if (esJugador && partesMensaje.length > 1) {
-                            miPartida.alienEliminado(miJugador, partesMensaje[1]);
+                        if (esJugador && partesMensaje.length > 2) {
+                            try {
+                                int idAlien = Integer.parseInt(partesMensaje[1]);
+                                miPartida.alienEliminado(miJugador, idAlien, partesMensaje[2]);
+                            } catch (NumberFormatException errorAlien) {
+                                System.out.println("Alien invalido: " + errorAlien.getMessage());
+                            }
                         }
                         break;
 
