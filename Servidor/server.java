@@ -43,7 +43,7 @@ public class server {
                 nuevoCliente.start(); 
             }
         }
-        catch (IOException errorsito) { // Acá agarra los despiches de red
+        catch (IOException errorsito) { 
             System.out.println("Murió el servidor: " + errorsito.getMessage());
             return;
         }

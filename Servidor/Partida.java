@@ -27,7 +27,7 @@ public class Partida {
         listaEspectadores.remove(espectador);
     }
 
-    // esto le escupe los datos a todos los clientes a los observadorsito
+    // esto le escupe los datos a todos los clientes que tengan los observadorsito
     public void notificarTodos(String mensaje) {
         for (Observadorsito espectador : listaEspectadores) {
             espectador.recibirActualizacion(mensaje);
