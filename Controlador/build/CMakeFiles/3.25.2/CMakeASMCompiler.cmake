@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 set(CMAKE_ASM_COMPILER "C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/bin/arm-none-eabi-gcc.exe")
 set(CMAKE_ASM_COMPILER_ARG1 "")
 set(CMAKE_AR "C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/bin/arm-none-eabi-ar.exe")
@@ -5,6 +6,15 @@ set(CMAKE_ASM_COMPILER_AR "C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/bin/arm-
 set(CMAKE_RANLIB "C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/bin/arm-none-eabi-ranlib.exe")
 set(CMAKE_ASM_COMPILER_RANLIB "C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/bin/arm-none-eabi-gcc-ranlib.exe")
 set(CMAKE_LINKER "C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/bin/arm-none-eabi-ld.exe")
+=======
+set(CMAKE_ASM_COMPILER "C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/gcc-arm-none-eabi/bin/arm-none-eabi-gcc.exe")
+set(CMAKE_ASM_COMPILER_ARG1 "")
+set(CMAKE_AR "C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/gcc-arm-none-eabi/bin/arm-none-eabi-ar.exe")
+set(CMAKE_ASM_COMPILER_AR "C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/gcc-arm-none-eabi/bin/arm-none-eabi-gcc-ar.exe")
+set(CMAKE_RANLIB "C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/gcc-arm-none-eabi/bin/arm-none-eabi-ranlib.exe")
+set(CMAKE_ASM_COMPILER_RANLIB "C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/gcc-arm-none-eabi/bin/arm-none-eabi-gcc-ranlib.exe")
+set(CMAKE_LINKER "C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/gcc-arm-none-eabi/bin/arm-none-eabi-ld.exe")
+>>>>>>> Stashed changes
 set(CMAKE_MT "")
 set(CMAKE_ASM_COMPILER_LOADED 1)
 set(CMAKE_ASM_COMPILER_ID "GNU")

@@ -1,4 +1,8 @@
+<<<<<<< Updated upstream
 # Install script for directory: C:/Users/sebas/.pico-sdk/sdk/2.2.0/src/rp2_common/hardware_pio
+=======
+# Install script for directory: C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/pico-sdk/src/rp2_common/hardware_pio
+>>>>>>> Stashed changes
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -34,6 +38,10 @@ endif()
 
 # Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
+<<<<<<< Updated upstream
   set(CMAKE_OBJDUMP "C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/bin/arm-none-eabi-objdump.exe")
+=======
+  set(CMAKE_OBJDUMP "C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/gcc-arm-none-eabi/bin/arm-none-eabi-objdump.exe")
+>>>>>>> Stashed changes
 endif()
 

@@ -1,7 +1,14 @@
+<<<<<<< Updated upstream
 set(CMAKE_C_COMPILER "C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/bin/arm-none-eabi-gcc.exe")
 set(CMAKE_C_COMPILER_ARG1 "")
 set(CMAKE_C_COMPILER_ID "GNU")
 set(CMAKE_C_COMPILER_VERSION "14.2.1")
+=======
+set(CMAKE_C_COMPILER "C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/gcc-arm-none-eabi/bin/arm-none-eabi-gcc.exe")
+set(CMAKE_C_COMPILER_ARG1 "")
+set(CMAKE_C_COMPILER_ID "GNU")
+set(CMAKE_C_COMPILER_VERSION "10.3.1")
+>>>>>>> Stashed changes
 set(CMAKE_C_COMPILER_VERSION_INTERNAL "")
 set(CMAKE_C_COMPILER_WRAPPER "")
 set(CMAKE_C_STANDARD_COMPUTED_DEFAULT "17")
@@ -21,11 +28,19 @@ set(CMAKE_C_SIMULATE_VERSION "")
 
 
 
+<<<<<<< Updated upstream
 set(CMAKE_AR "C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/bin/arm-none-eabi-ar.exe")
 set(CMAKE_C_COMPILER_AR "C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/bin/arm-none-eabi-gcc-ar.exe")
 set(CMAKE_RANLIB "C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/bin/arm-none-eabi-ranlib.exe")
 set(CMAKE_C_COMPILER_RANLIB "C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/bin/arm-none-eabi-gcc-ranlib.exe")
 set(CMAKE_LINKER "C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/bin/arm-none-eabi-ld.exe")
+=======
+set(CMAKE_AR "C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/gcc-arm-none-eabi/bin/arm-none-eabi-ar.exe")
+set(CMAKE_C_COMPILER_AR "C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/gcc-arm-none-eabi/bin/arm-none-eabi-gcc-ar.exe")
+set(CMAKE_RANLIB "C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/gcc-arm-none-eabi/bin/arm-none-eabi-ranlib.exe")
+set(CMAKE_C_COMPILER_RANLIB "C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/gcc-arm-none-eabi/bin/arm-none-eabi-gcc-ranlib.exe")
+set(CMAKE_LINKER "C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/gcc-arm-none-eabi/bin/arm-none-eabi-ld.exe")
+>>>>>>> Stashed changes
 set(CMAKE_MT "")
 set(CMAKE_COMPILER_IS_GNUCC 1)
 set(CMAKE_C_COMPILER_LOADED 1)
@@ -66,7 +81,13 @@ endif()
 
 
 
+<<<<<<< Updated upstream
 set(CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES "C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/lib/gcc/arm-none-eabi/14.2.1/include;C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/lib/gcc/arm-none-eabi/14.2.1/include-fixed;C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/arm-none-eabi/include")
 set(CMAKE_C_IMPLICIT_LINK_LIBRARIES "")
 set(CMAKE_C_IMPLICIT_LINK_DIRECTORIES "C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/lib/gcc/arm-none-eabi/14.2.1/thumb/v6-m/nofp;C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/arm-none-eabi/lib/thumb/v6-m/nofp;C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/lib/gcc/arm-none-eabi/14.2.1;C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/lib/gcc;C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/arm-none-eabi/lib")
+=======
+set(CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES "C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/10.3.1/include;C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/10.3.1/include-fixed;C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/gcc-arm-none-eabi/arm-none-eabi/include")
+set(CMAKE_C_IMPLICIT_LINK_LIBRARIES "")
+set(CMAKE_C_IMPLICIT_LINK_DIRECTORIES "C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/10.3.1/thumb/v6-m/nofp;C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/gcc-arm-none-eabi/arm-none-eabi/lib/thumb/v6-m/nofp;C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/10.3.1;C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/gcc-arm-none-eabi/lib/gcc;C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/gcc-arm-none-eabi/arm-none-eabi/lib")
+>>>>>>> Stashed changes
 set(CMAKE_C_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES "")

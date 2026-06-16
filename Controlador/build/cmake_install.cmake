@@ -34,7 +34,11 @@ endif()
 
 # Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
+<<<<<<< Updated upstream
   set(CMAKE_OBJDUMP "C:/Users/sebas/.pico-sdk/toolchain/14_2_Rel1/bin/arm-none-eabi-objdump.exe")
+=======
+  set(CMAKE_OBJDUMP "C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/gcc-arm-none-eabi/bin/arm-none-eabi-objdump.exe")
+>>>>>>> Stashed changes
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)

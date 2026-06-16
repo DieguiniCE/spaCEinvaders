@@ -6,10 +6,14 @@ public class server {
 
     private static final int ANCHO_PANTALLA = 800;
     private static final int ALTO_PANTALLA = 600;
+<<<<<<< Updated upstream
     private static final int ANCHO_CANON = 40;
     private static final int VELOCIDAD_CANON = 5;
 
     private Socket stream = null;
+=======
+
+>>>>>>> Stashed changes
     private ServerSocket streamServidor = null;
     private InputStream entrada = null;
     private OutputStream salida = null;
@@ -31,8 +35,15 @@ public class server {
             entrada = stream.getInputStream();
             salida = stream.getOutputStream();
 
+<<<<<<< Updated upstream
             enviarEstado();
         }
+=======
+                    int posX = (ANCHO_PANTALLA / 2) + (cantidadJugadores == 1 ? -80 : 80);
+                    jugadorAsignado = new jugador(posX, ALTO_PANTALLA - 50, 3, cantidadJugadores);
+                    partidaPrincipal.agregarJugador(jugadorAsignado);
+                    System.out.println("Se le asignó el control: JUGADOR " + cantidadJugadores);
+>>>>>>> Stashed changes
 
         catch (UnknownHostException error) {
             System.out.println(error);

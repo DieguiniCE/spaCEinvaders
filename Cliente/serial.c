@@ -52,8 +52,11 @@ int serial_abrir(PuertoSerial* puerto, const char* nombrePuerto, DWORD baudios) 
     timeouts.ReadIntervalTimeout = MAXDWORD;
     timeouts.ReadTotalTimeoutMultiplier = 0;
     timeouts.ReadTotalTimeoutConstant = 0;
+<<<<<<< Updated upstream
     timeouts.WriteTotalTimeoutMultiplier = 0;
     timeouts.WriteTotalTimeoutConstant = 0;
+=======
+>>>>>>> Stashed changes
     SetCommTimeouts(puerto->handle, &timeouts);
 
     puerto->conectado = 1;

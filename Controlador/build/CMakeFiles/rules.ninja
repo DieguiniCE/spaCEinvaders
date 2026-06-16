@@ -17,7 +17,11 @@
 rule ASM_COMPILER__spaceinvaders_controller_Release
   depfile = $DEP_FILE
   deps = gcc
+<<<<<<< Updated upstream
   command = C:\Users\sebas\.pico-sdk\toolchain\14_2_Rel1\bin\arm-none-eabi-gcc.exe $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out   -c $in
+=======
+  command = C:\PROGRA~1\RASPBE~1\PICOSD~1.1\GCC-AR~1\bin\AR19DD~1.EXE $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out   -c $in
+>>>>>>> Stashed changes
   description = Building ASM object $out
 
 
@@ -27,7 +31,11 @@ rule ASM_COMPILER__spaceinvaders_controller_Release
 rule C_COMPILER__spaceinvaders_controller_Release
   depfile = $DEP_FILE
   deps = gcc
+<<<<<<< Updated upstream
   command = C:\Users\sebas\.pico-sdk\toolchain\14_2_Rel1\bin\arm-none-eabi-gcc.exe $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
+=======
+  command = C:\PROGRA~1\RASPBE~1\PICOSD~1.1\GCC-AR~1\bin\AR19DD~1.EXE $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
+>>>>>>> Stashed changes
   description = Building C object $out
 
 
@@ -37,7 +45,11 @@ rule C_COMPILER__spaceinvaders_controller_Release
 rule CXX_COMPILER__spaceinvaders_controller_Release
   depfile = $DEP_FILE
   deps = gcc
+<<<<<<< Updated upstream
   command = C:\Users\sebas\.pico-sdk\toolchain\14_2_Rel1\bin\arm-none-eabi-g++.exe $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
+=======
+  command = C:\PROGRA~1\RASPBE~1\PICOSD~1.1\GCC-AR~1\bin\AR10B2~1.EXE $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
+>>>>>>> Stashed changes
   description = Building CXX object $out
 
 
@@ -45,7 +57,11 @@ rule CXX_COMPILER__spaceinvaders_controller_Release
 # Rule for linking CXX executable.
 
 rule CXX_EXECUTABLE_LINKER__spaceinvaders_controller_Release
+<<<<<<< Updated upstream
   command = cmd.exe /C "$PRE_LINK && C:\Users\sebas\.pico-sdk\toolchain\14_2_Rel1\bin\arm-none-eabi-g++.exe $FLAGS -Wl,--build-id=none $LINK_FLAGS @$RSP_FILE -o $TARGET_FILE  && $POST_BUILD"
+=======
+  command = cmd.exe /C "$PRE_LINK && C:\PROGRA~1\RASPBE~1\PICOSD~1.1\GCC-AR~1\bin\AR10B2~1.EXE $FLAGS -Wl,--build-id=none $LINK_FLAGS @$RSP_FILE -o $TARGET_FILE  && $POST_BUILD"
+>>>>>>> Stashed changes
   description = Linking CXX executable $TARGET_FILE
   rspfile = $RSP_FILE
   rspfile_content = $in $LINK_PATH $LINK_LIBRARIES
@@ -66,7 +82,11 @@ rule CUSTOM_COMMAND
 rule ASM_COMPILER__bs2_default_Release
   depfile = $DEP_FILE
   deps = gcc
+<<<<<<< Updated upstream
   command = C:\Users\sebas\.pico-sdk\toolchain\14_2_Rel1\bin\arm-none-eabi-gcc.exe $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out   -c $in
+=======
+  command = C:\PROGRA~1\RASPBE~1\PICOSD~1.1\GCC-AR~1\bin\AR19DD~1.EXE $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out   -c $in
+>>>>>>> Stashed changes
   description = Building ASM object $out
 
 
@@ -74,12 +94,17 @@ rule ASM_COMPILER__bs2_default_Release
 # Rule for linking ASM executable.
 
 rule ASM_EXECUTABLE_LINKER__bs2_default_Release
+<<<<<<< Updated upstream
   command = cmd.exe /C "$PRE_LINK && C:\Users\sebas\.pico-sdk\toolchain\14_2_Rel1\bin\arm-none-eabi-gcc.exe $FLAGS -Wl,--build-id=none $LINK_FLAGS $in -o $TARGET_FILE $LINK_PATH $LINK_LIBRARIES && $POST_BUILD"
+=======
+  command = cmd.exe /C "$PRE_LINK && C:\PROGRA~1\RASPBE~1\PICOSD~1.1\GCC-AR~1\bin\AR19DD~1.EXE $FLAGS -Wl,--build-id=none $LINK_FLAGS $in -o $TARGET_FILE $LINK_PATH $LINK_LIBRARIES && $POST_BUILD"
+>>>>>>> Stashed changes
   description = Linking ASM executable $TARGET_FILE
   restat = $RESTAT
 
 
 #############################################
+<<<<<<< Updated upstream
 # Rule for compiling ASM files.
 
 rule ASM_COMPILER__bs2_default_library_Release
@@ -90,6 +115,8 @@ rule ASM_COMPILER__bs2_default_library_Release
 
 
 #############################################
+=======
+>>>>>>> Stashed changes
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE

@@ -1,12 +1,17 @@
 /**
  * constants.h
  * spaCEinvaders - Raspberry Pi Pico Controller
+<<<<<<< Updated upstream
  * Constantes globales del control físico.
+=======
+ * Constantes globales del control fisico.
+>>>>>>> Stashed changes
  */
 
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+<<<<<<< Updated upstream
 /* ── Pines GPIO ─────────────────────────────────────────────────── */
 #define BTN_MOVE_PIN     16   /* GP16 – botón de movimiento (1 toque=izq, 2=der) */
 #define BTN_FIRE_PIN     13   /* GP13 – botón de disparo                          */
@@ -41,12 +46,36 @@
  *   - Mínima latencia (no hay cabecera ni checksum necesarios a
  *     esta velocidad de juego).
  */
+=======
+/* Pines GPIO */
+#define BTN_MOVE_PIN     16   /* GP16 - boton movimiento (1 toque=izq, 2=der) */
+#define BTN_FIRE_PIN     13   /* GP13 - boton disparo                          */
+
+/* UART por USB (CDC) - 115200 8N1, un byte ASCII por comando */
+#define UART_BAUD_RATE   115200
+
+/* Movimiento continuo: retencion breve para distinguir doble toque y repeticion */
+#define DOUBLE_TAP_WINDOW_MS   180
+#define MOVE_HOLD_THRESHOLD_MS 180
+#define MOVE_REPEAT_MS          90
+
+/* Debounce (ms) */
+#define DEBOUNCE_MS      50
+
+/* Protocolo: 1 byte por comando */
+>>>>>>> Stashed changes
 #define CMD_LEFT         'L'
 #define CMD_RIGHT        'R'
 #define CMD_FIRE         'F'
 
+<<<<<<< Updated upstream
 /* ── Indicador LED onboard ──────────────────────────────────────── */
 #define LED_PIN          25   /* LED interno del Pico (confirmación visual)       */
 #define LED_BLINK_MS     80   /* Duración del parpadeo al enviar un comando       */
+=======
+/* LED onboard para confirmacion visual */
+#define LED_PIN          25
+#define LED_BLINK_MS     80
+>>>>>>> Stashed changes
 
 #endif /* CONSTANTS_H */
