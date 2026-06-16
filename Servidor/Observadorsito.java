@@ -1,6 +1,6 @@
 package Servidor;
 
-public interface Observador {
+public interface Observadorsito {
     
     void recibirActualizacion(String estadoJuego);
 }

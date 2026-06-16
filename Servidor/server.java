@@ -7,35 +7,49 @@ public class server {
     private ServerSocket streamServidor = null;
 
     public server(int port) {
-        //esto es para conectarse
-        try
-        {
+        // Acá se inicia el server
+        try {
             streamServidor = new ServerSocket(port);
-            System.out.println("Conectado");
-            System.out.println("Esperando conexiones");
+            System.out.println("Servidor iniciado puramente. Esperando clientes...");
 
-            //hacemos un ciclo infinito para que el servidor siempre escuche
-            while (true) 
-            {
-                //el servidor se queda esperando acá hasta que alguien se conecte
+            Partida partidaPrincipal = new Partida(); // Creamos la partida general
+            int cantidadJugadores = 0; // Para llevar la cuenta de cuántos juegan
+
+            // Ciclo infinito para escuchar a todo el que llegue
+            while (true) {
                 Socket stream = streamServidor.accept();
-                System.out.println("Cliente aceptado");
+                System.out.println("¡Cayó alguien nuevo al server!");
 
-                //cuando alguien se conecta, creamos un hilo para ese cliente
-                //y le pasamos el socket (stream) que acaba de conectarse
-                HiloCliente nuevoCliente = new HiloCliente(stream);
+                boolean esJugador = false;
+                jugador jugadorAsignado = null;
                 
-                //iniciamos el hilo para que trabaje en paralelo
+                // Si hay menos de 2, lo metemos a jugar
+                if (cantidadJugadores < 2) {
+                    cantidadJugadores++;
+                    esJugador = true;
+
+                    // Se crea con X=0, Y=0, 3 vidas, y su ID de jugador es 1 o 2
+                    jugadorAsignado = new jugador(0, 0, 3, cantidadJugadores);
+                    partidaPrincipal.agregarJugador(jugadorAsignado);
+                    System.out.println("Se le asignó el control: JUGADOR " + cantidadJugadores);
+
+                } else {
+                    // Si ya están los 2, se meten de sapos
+                    System.out.println("Se le asignó el rol: SAPO ");
+                }
+
+                // Le hacemos su propio hilo para no pegar el server
+                HiloCliente nuevoCliente = new HiloCliente(stream, esJugador, partidaPrincipal, jugadorAsignado);
                 nuevoCliente.start(); 
             }
-		}
-        catch (IOException errorsito){ //acá agarra los errores de entrada y salida
-				System.out.println(errorsito);
-				return;
-		}
+        }
+        catch (IOException errorsito) { // Acá agarra los despiches de red
+            System.out.println("Murió el servidor: " + errorsito.getMessage());
+            return;
+        }
     }
 
-	public static void main(String[] args) {
+    public static void main(String[] args) {
         server c = new server(5000);
     }
 }

@@ -7,14 +7,12 @@ public class enemigo extends individuo implements ataque{
     public enemigo(int X, int Y, String ID, int puntos){
         super(X, Y);
         this.ID = ID;
-        this.puntos = puntos;
+        this.puntos = puntos; 
     }
 
-    
     public void disparo(){}
 
     public String getID(){
         return this.ID;
     }
-
 }
