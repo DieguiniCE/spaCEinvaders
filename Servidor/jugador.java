@@ -28,23 +28,11 @@ public class jugador extends individuo implements ataque {
         if (conVida){
             this.posX = x;
             this.posY = y;
-<<<<<<< Updated upstream
-=======
         }
     }
 
     public void perderVida(){
-        if (cantidadVidas >= 1){
-            this.cantidadVidas -= 1; 
-        }
-        else {
-            this.conVida = false; // ya mamó el compa
->>>>>>> Stashed changes
-        }
-    }
-
-    public void perderVida(){
-        if (cantidadVidas >= 1){
+        if (cantidadVidas > 0){
             this.cantidadVidas -= 1; 
         }
         else {

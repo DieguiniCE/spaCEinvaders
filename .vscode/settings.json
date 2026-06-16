@@ -1,3 +1,12 @@
 {
-    "cmake.sourceDirectory": "C:/Users/sebas/source/repos/spaCEinvaders/Controlador"
+    "cmake.sourceDirectory": "C:/Users/sebas/source/repos/spaCEinvaders/Controlador",
+    "cmake.buildDirectory": "C:/Users/sebas/source/repos/spaCEinvaders/build-ninja",
+    "cmake.generator": "NMake Makefiles",
+    "cmake.configureSettings": {
+        "CMAKE_MAKE_PROGRAM": "C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64/nmake.exe"
+    },
+    "cmake.configureEnvironment": {
+        "PATH": "C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64;${env:PATH}",
+        "PICO_SDK_PATH": "C:/Program Files/Raspberry Pi/Pico SDK v1.5.1/pico-sdk"
+    }
 }

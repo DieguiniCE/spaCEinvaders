@@ -17,7 +17,7 @@ public class server {
     private jugador jugador1;
 
     public server(int port) {
-        jugador1 = new jugador(ANCHO_PANTALLA / 2, ALTO_PANTALLA - 50, 3);
+        jugador1 = new jugador(ANCHO_PANTALLA / 2, ALTO_PANTALLA - 50, 3, 1);
 
         try
         {
@@ -34,11 +34,6 @@ public class server {
 
             enviarEstado();
         }
-                    int posX = (ANCHO_PANTALLA / 2) + (cantidadJugadores == 1 ? -80 : 80);
-                    jugadorAsignado = new jugador(posX, ALTO_PANTALLA - 50, 3, cantidadJugadores);
-                    partidaPrincipal.agregarJugador(jugadorAsignado);
-                    System.out.println("Se le asignó el control: JUGADOR " + cantidadJugadores);
-
         catch (UnknownHostException error) {
             System.out.println(error);
             return;
