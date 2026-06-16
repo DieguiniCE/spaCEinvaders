@@ -17,8 +17,4 @@ public class enemigo extends individuo implements ataque{
         return this.ID;
     }
 
-    public void setPuntos(int puntos){
-        this.puntos = puntos;
-    }
-
 }

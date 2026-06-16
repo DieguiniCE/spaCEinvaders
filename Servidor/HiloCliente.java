@@ -8,7 +8,7 @@ public class HiloCliente extends Thread {
     private Socket stream = null;
     private DataInputStream entrada = null;
 	private DataOutputStream salida = null;
-
+    
     //el constructor recibe el socket del cliente que le mandó el servidor
     public HiloCliente(Socket conexion) {
         this.stream = conexion;
