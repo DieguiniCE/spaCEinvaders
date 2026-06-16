@@ -20,6 +20,29 @@ public class jugador extends individuo implements ataque {
         return this.cantidadPuntos;
     }
 
+    public int getVidas(){
+        return this.cantidadVidas;
+    }
+
+    public void establecerPosicion(int x, int y){
+        if (conVida){
+            this.posX = x;
+            this.posY = y;
+<<<<<<< Updated upstream
+=======
+        }
+    }
+
+    public void perderVida(){
+        if (cantidadVidas >= 1){
+            this.cantidadVidas -= 1; 
+        }
+        else {
+            this.conVida = false; // ya mamó el compa
+>>>>>>> Stashed changes
+        }
+    }
+
     public void perderVida(){
         if (cantidadVidas >= 1){
             this.cantidadVidas -= 1; 

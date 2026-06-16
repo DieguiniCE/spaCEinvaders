@@ -1,16 +1,17 @@
 package Servidor;
 import java.net.*;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 public class HiloCliente extends Thread implements Observadorsito {
-    
+
     private Socket stream = null;
-    private DataInputStream entrada = null;
-    private DataOutputStream salida = null;
-    
+    private BufferedReader entrada = null;
+    private PrintWriter salida = null;
+
     private boolean esJugador;
     private Partida miPartida;
-    private jugador miJugador; // Guarda qué jugador es el dueño del cliente
+    private jugador miJugador;
 
     public HiloCliente(Socket conexion, boolean esJugador, Partida partida, jugador miJugador) {
         this.stream = conexion;
@@ -23,89 +24,93 @@ public class HiloCliente extends Thread implements Observadorsito {
     public void recibirActualizacion(String estadoJuego) {
         try {
             if (salida != null) {
-                salida.writeUTF(estadoJuego);
-                salida.flush(); //lo borra
+                salida.println(estadoJuego);
             }
-        } catch (IOException errorsito3) {
+        } catch (Exception errorsito3) {
             System.out.println("Error mandando info al cliente: " + errorsito3.getMessage());
         }
     }
 
-   
     public void run() {
         try {
+            entrada = new BufferedReader(new InputStreamReader(
+                stream.getInputStream(), StandardCharsets.UTF_8));
+            salida = new PrintWriter(new OutputStreamWriter(
+                stream.getOutputStream(), StandardCharsets.UTF_8), true);
 
-            // dartos de entrada y salida
-            entrada = new DataInputStream(new BufferedInputStream(stream.getInputStream()));
-            salida = new DataOutputStream(stream.getOutputStream());
+            miPartida.registrarCliente(this, esJugador, miJugador);
 
-            miPartida.agregarEspectador(this);
+            String mensaje;
+            while ((mensaje = entrada.readLine()) != null && !mensaje.equals("Over")) {
+                System.out.println("Llego mensaje: " + mensaje);
 
-            String mensaje = ""; 
-            
-            // Ciclo hasta que manden "Over" 
-            while (!mensaje.equals("Over")) {
-                try {
-                    mensaje = entrada.readUTF();
-                    System.out.println("Llegó mensaje: " + mensaje);
-                    
-                    // se parte el mensaje por comas
-                    String[] partesMensaje = mensaje.split(",");
-                    String comando = partesMensaje[0];
+                String[] partesMensaje = mensaje.split(",");
+                String comando = partesMensaje[0];
 
-                    switch (comando) {
-                        // comunicación
-                        case "MATE_ALIEN":
-                            if (esJugador && partesMensaje.length > 1) {
-                                miPartida.alienEliminado(miJugador, partesMensaje[1]);
-                            }
-                            break;
-                            
-                        case "PERDI_VIDA":
-                            if (esJugador) miPartida.jugadorPierdeVida(miJugador);
-                            break;
+                switch (comando) {
+                    case "MOVER":
+                        if (esJugador && partesMensaje.length > 1) {
+                            miPartida.moverJugador(miJugador, partesMensaje[1]);
+                        }
+                        break;
 
-                        case "LIMPIE_PANTALLA":
-                            if (esJugador) miPartida.oleadaLimpiada(miJugador);
-                            break;
+                    case "DISPARO":
+                        if (esJugador) {
+                            miPartida.jugadorDispara(miJugador);
+                        }
+                        break;
 
-                        
-                        case "Crear":
-                            // Ej: Crear,1,1,1000
-                            if (partesMensaje.length >= 4) miPartida.adminCrearAlien(partesMensaje[1], partesMensaje[2], partesMensaje[3]);
-                            break;
+                    case "MATE_ALIEN":
+                        if (esJugador && partesMensaje.length > 1) {
+                            miPartida.alienEliminado(miJugador, partesMensaje[1]);
+                        }
+                        break;
 
-                        case "OVNI":
-                            // Ej: OVNI,I-D,1500
-                            if (partesMensaje.length >= 3) miPartida.adminCrearOvni(partesMensaje[1], partesMensaje[2]);
-                            break;
+                    case "PERDI_VIDA":
+                        if (esJugador) {
+                            miPartida.jugadorPierdeVida(miJugador);
+                        }
+                        break;
 
-                        case "Velocidad":
-                            // Ej: Velocidad,100
-                            if (partesMensaje.length >= 2) miPartida.adminVelocidad(partesMensaje[1]);
-                            break;
+                    case "LIMPIE_PANTALLA":
+                        if (esJugador) {
+                            miPartida.oleadaLimpiada(miJugador);
+                        }
+                        break;
 
-                        case "Bunkers":
-                            // Ej: Bunkers,70%
-                            if (partesMensaje.length >= 2) miPartida.adminBunkers(partesMensaje[1]);
-                            break;
+                    case "Crear":
+                        if (partesMensaje.length >= 4) {
+                            miPartida.adminCrearAlien(partesMensaje[1], partesMensaje[2], partesMensaje[3]);
+                        }
+                        break;
 
-                        default:
-                            System.out.println("Ese comando no existe papi: " + comando);
-                            break;
-                    }
-                }
-                catch (IOException errorsito2) {
-                    System.out.println("Un mae se desconectó.");
-                    break; 
+                    case "OVNI":
+                        if (partesMensaje.length >= 3) {
+                            miPartida.adminCrearOvni(partesMensaje[1], partesMensaje[2]);
+                        }
+                        break;
+
+                    case "Velocidad":
+                        if (partesMensaje.length >= 2) {
+                            miPartida.adminVelocidad(partesMensaje[1]);
+                        }
+                        break;
+
+                    case "Bunkers":
+                        if (partesMensaje.length >= 2) {
+                            miPartida.adminBunkers(partesMensaje[1]);
+                        }
+                        break;
+
+                    default:
+                        System.out.println("Comando desconocido: " + comando);
+                        break;
                 }
             }
-            
-            // Lo borramos de la lista si se sale
-            miPartida.quitarEspectador(this);
+
+            miPartida.quitarObservador(this);
             stream.close();
-        } 
-        catch (IOException errorsito) { 
+        } catch (IOException errorsito) {
             System.out.println("Despiche general en el hilo: " + errorsito.getMessage());
         }
     }

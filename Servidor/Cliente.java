@@ -53,7 +53,7 @@ public class Cliente {
 
 
     public static  void main(String[] args) {
-        Cliente c = new Cliente("0.0.0.0", 5000);
+        Cliente c = new Cliente("127.0.0.1", 8080);
     }
 }
     
