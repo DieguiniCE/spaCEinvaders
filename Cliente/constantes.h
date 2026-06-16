@@ -14,5 +14,16 @@
 #define PTS_CALAMAR 10
 #define PTS_CANGREJO 20
 #define PTS_PULPO 40
+#define VELOCIDAD_CANON 5
+#define ANCHO_CANON 40
+
+// Controlador fisico (Pico via USB-serial)
+#define UART_BAUD_RATE 115200
+#define PUERTO_SERIAL "COM3" // Ajustar segun el Administrador de dispositivos
+
+// Protocolo de comandos (1 byte ASCII, igual que Controlador/constants.h)
+#define CMD_LEFT 'L'
+#define CMD_RIGHT 'R'
+#define CMD_FIRE 'F'
 
 #endif // CONSTANTES_H
