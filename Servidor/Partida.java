@@ -48,8 +48,10 @@ public class Partida {
     private final ArrayList<jugador> listaJugadores;
     private final ArrayList<Observadorsito> listaObservadores;
     private final ArrayList<EstadoAlien> listaAliens;
+    private final boolean[] jugadoresOcupados;
     private final int[] bunkerSalud;
     private final Random random;
+    private final int idSesion;
     private double velocidadAliens;
     private String estadoBunkers;
     private int contadorAliens;
@@ -58,11 +60,17 @@ public class Partida {
     private int direccionAliens;
 
     public Partida() {
+        this(0);
+    }
+
+    public Partida(int idSesion) {
         this.listaJugadores = new ArrayList<>();
         this.listaObservadores = new ArrayList<>();
         this.listaAliens = new ArrayList<>();
+        this.jugadoresOcupados = new boolean[] {false, false, false};
         this.bunkerSalud = new int[] {100, 100, 100, 100};
         this.random = new Random();
+        this.idSesion = idSesion;
         this.velocidadAliens = 1.0;
         this.estadoBunkers = "100,100,100,100";
         this.contadorAliens = 0;
@@ -70,23 +78,61 @@ public class Partida {
         this.ovniActual = null;
         this.direccionAliens = 1;
 
-        Thread hiloEventos = new Thread(this::bucleEventosAutomaticos, "PartidaEventos");
+        Thread hiloEventos = new Thread(this::bucleEventosAutomaticos, "PartidaEventos-" + idSesion);
         hiloEventos.setDaemon(true);
         hiloEventos.start();
     }
 
-    public synchronized jugador crearJugador(int idJugador) {
-        return new jugador(ANCHO_PANTALLA / 2, ALTO_PANTALLA - 50, 3, idJugador);
+    public int getIdSesion() {
+        return idSesion;
     }
 
-    public synchronized void agregarJugador(jugador nuevoJugador) {
-        if (nuevoJugador != null && !listaJugadores.contains(nuevoJugador)) {
-            listaJugadores.add(nuevoJugador);
+    public synchronized jugador asignarJugador() {
+        return asignarJugador(1, 1);
+    }
+
+    public synchronized jugador asignarJugador(int maxJugadores, int jugadorPreferido) {
+        if (maxJugadores <= 1) {
+            int idJugador = (jugadorPreferido == 2) ? 2 : 1;
+            if (!jugadoresOcupados[idJugador]) {
+                return ocuparJugador(idJugador);
+            }
+            return null;
         }
+
+        for (int idJugador = 1; idJugador <= 2 && idJugador < jugadoresOcupados.length; idJugador++) {
+            if (!jugadoresOcupados[idJugador]) {
+                return ocuparJugador(idJugador);
+            }
+        }
+
+        return null;
+    }
+
+    private jugador ocuparJugador(int idJugador) {
+        jugadoresOcupados[idJugador] = true;
+        jugador nuevoJugador = new jugador(ANCHO_PANTALLA / 2, ALTO_PANTALLA - 50, 3, idJugador);
+        listaJugadores.add(nuevoJugador);
+        return nuevoJugador;
+    }
+
+    public synchronized void liberarJugador(jugador jugadorAbandonado) {
+        if (jugadorAbandonado == null) {
+            return;
+        }
+
+        int idJugador = jugadorAbandonado.idJugador;
+        if (idJugador > 0 && idJugador < jugadoresOcupados.length) {
+            jugadoresOcupados[idJugador] = false;
+        }
+
+        listaJugadores.remove(jugadorAbandonado);
+        notificarTodos("BORRAR_JUGADOR," + idJugador);
     }
 
     public synchronized void registrarCliente(Observadorsito cliente, boolean esJugador, jugador jugadorAsignado) {
         listaObservadores.add(cliente);
+        cliente.recibirActualizacion("SESION," + this.idSesion);
 
         if (esJugador && jugadorAsignado != null) {
             cliente.recibirActualizacion("BIENVENIDA,J" + jugadorAsignado.idJugador);

@@ -9,15 +9,15 @@ public class HiloCliente extends Thread implements Observadorsito {
     private BufferedReader entrada = null;
     private PrintWriter salida = null;
 
-    private boolean esJugador;
+    private server miServidor;
     private Partida miPartida;
     private jugador miJugador;
 
-    public HiloCliente(Socket conexion, boolean esJugador, Partida partida, jugador miJugador) {
+    public HiloCliente(Socket conexion, server servidor) {
         this.stream = conexion;
-        this.esJugador = esJugador;
-        this.miPartida = partida;
-        this.miJugador = miJugador;
+        this.miServidor = servidor;
+        this.miPartida = null;
+        this.miJugador = null;
     }
 
     @Override
@@ -37,6 +37,21 @@ public class HiloCliente extends Thread implements Observadorsito {
                 stream.getInputStream(), StandardCharsets.UTF_8));
             salida = new PrintWriter(new OutputStreamWriter(
                 stream.getOutputStream(), StandardCharsets.UTF_8), true);
+
+            String solicitudRol = entrada.readLine();
+            boolean esEspectador = solicitudRol != null && solicitudRol.trim().equalsIgnoreCase("ROL,ESPECTADOR");
+            boolean esJugador = !esEspectador;
+
+            if (esJugador) {
+                miPartida = miServidor.crearPartidaJugador();
+                if (miServidor.esModoCooperativo()) {
+                    miJugador = miPartida.asignarJugador(2, 1);
+                } else {
+                    miJugador = miPartida.asignarJugador();
+                }
+            } else {
+                miPartida = miServidor.obtenerPartidaActiva();
+            }
 
             miPartida.registrarCliente(this, esJugador, miJugador);
 
@@ -137,9 +152,15 @@ public class HiloCliente extends Thread implements Observadorsito {
             }
 
             miPartida.quitarObservador(this);
+            if (miJugador != null) {
+                miPartida.liberarJugador(miJugador);
+            }
             stream.close();
         } catch (IOException errorsito) {
             System.out.println("Despiche general en el hilo: " + errorsito.getMessage());
+            if (miJugador != null) {
+                miPartida.liberarJugador(miJugador);
+            }
         }
     }
 }

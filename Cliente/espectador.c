@@ -156,6 +156,15 @@ static void ProcesarLineaEspectador(const char* linea) {
         return;
     }
 
+    if (sscanf(linea, "BORRAR_JUGADOR,%d", &idAlien) == 1) {
+        if (idAlien == 1) {
+            Jugador1.activo = 0;
+        } else if (idAlien == 2) {
+            Jugador2.activo = 0;
+        }
+        return;
+    }
+
     if (sscanf(linea, "VELOCIDAD,%lf", &VelocidadAliens) == 1) {
         return;
     }
@@ -214,6 +223,7 @@ int main(void) {
         return 1;
     }
 
+    send(socketCliente, "ROL,ESPECTADOR\n", (int)strlen("ROL,ESPECTADOR\n"), 0);
     printf("Espectador conectado. Observando partida...\n");
     CreateThread(NULL, 0, EscucharServidorEspectador, &socketCliente, 0, NULL);
 

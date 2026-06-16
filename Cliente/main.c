@@ -50,9 +50,11 @@ typedef struct {
 } ContextoControlador;
 
 static int ServidorConectado = 0;
+static int PicoHabilitado = 0;
+static int TecladoHabilitado = 1;
 static volatile char ComandoPendiente = 0;
 static CRITICAL_SECTION BloqueoEstado;
-static int MiIdJugador = 1;
+static int MiIdJugador = 0;
 static char TextoBunkers[32] = "100%";
 static double VelocidadAliens = 1.0;
 static int JuegoActivo = 1;
@@ -386,6 +388,14 @@ static void ProcesarMensajeServidor(
     if (sscanf(mensaje, "BIENVENIDA,%15s", rol) == 1) {
         if (strncmp(rol, "J", 1) == 0) {
             *miIdJugador = rol[1] - '0';
+            PicoHabilitado = 1;
+            TecladoHabilitado = 1;
+            printf("Servidor asigno jugador J%d\n", *miIdJugador);
+        } else {
+            *miIdJugador = 0;
+            PicoHabilitado = 0;
+            TecladoHabilitado = 0;
+            printf("Servidor asigno espectador\n");
         }
         return;
     }
@@ -412,6 +422,14 @@ static void ProcesarMensajeServidor(
 
     if (sscanf(mensaje, "GAME_OVER_J%d,", &jugador) == 1 && jugador == *miIdJugador) {
         *juegoActivo = 0;
+        return;
+    }
+
+    if (sscanf(mensaje, "BORRAR_JUGADOR,%d", &jugador) == 1) {
+        if (jugador == *miIdJugador) {
+            canon->vidas = 0;
+            *juegoActivo = 0;
+        }
         return;
     }
 
@@ -594,9 +612,10 @@ DWORD WINAPI EscucharControlador(LPVOID parametro) {
 
     while (contexto->puerto->conectado) {
         if (serial_leer_byte(contexto->puerto, &byteComando, 100)) {
-            if (byteComando == CMD_LEFT || byteComando == CMD_RIGHT || byteComando == CMD_FIRE) {
+            if ((!ServidorConectado || PicoHabilitado) &&
+                (byteComando == CMD_LEFT || byteComando == CMD_RIGHT || byteComando == CMD_FIRE)) {
                 *(contexto->comandoPendiente) = byteComando;
-                if (*(contexto->servidorConectado)) {
+                if (ServidorConectado && PicoHabilitado) {
                     EnviarComandoControlador(contexto->socketServidor, byteComando);
                 }
             }
@@ -634,9 +653,14 @@ int main(int argc, char* argv[]) {
     if (connect(socketCliente, (struct sockaddr*)&direccionServidor, sizeof(direccionServidor)) == SOCKET_ERROR) {
         printf("Advertencia: No se pudo conectar al servidor Java. Modo offline.\n");
         ServidorConectado = 0;
+        PicoHabilitado = 1;
+        TecladoHabilitado = 1;
     } else {
         printf("Conectado al servidor en %s:%d\n", IP_SERVIDOR, PUERTO_SERVIDOR);
         ServidorConectado = 1;
+        PicoHabilitado = 1;
+        TecladoHabilitado = 1;
+        EnviarLineaAlServidor(socketCliente, "ROL,JUGADOR");
     }
 
     if (!ServidorConectado) {
@@ -671,7 +695,7 @@ int main(int argc, char* argv[]) {
     while (JuegoActivo && !WindowShouldClose()) {
         float deltaTime = GetFrameTime();
 
-        if (ComandoPendiente != 0) {
+        if (ComandoPendiente != 0 && (!ServidorConectado || MiIdJugador > 0)) {
             char comando = ComandoPendiente;
             ComandoPendiente = 0;
             EnterCriticalSection(&BloqueoEstado);
@@ -679,19 +703,19 @@ int main(int argc, char* argv[]) {
             LeaveCriticalSection(&BloqueoEstado);
         }
 
-        if (IsKeyDown(KEY_RIGHT)) {
+        if ((!ServidorConectado || TecladoHabilitado) && IsKeyDown(KEY_RIGHT)) {
             EnterCriticalSection(&BloqueoEstado);
             AplicarComandoLocal(&canon, &proyectil, CMD_RIGHT);
             LeaveCriticalSection(&BloqueoEstado);
             if (ServidorConectado) EnviarComandoControlador(socketCliente, CMD_RIGHT);
         }
-        if (IsKeyDown(KEY_LEFT)) {
+        if ((!ServidorConectado || TecladoHabilitado) && IsKeyDown(KEY_LEFT)) {
             EnterCriticalSection(&BloqueoEstado);
             AplicarComandoLocal(&canon, &proyectil, CMD_LEFT);
             LeaveCriticalSection(&BloqueoEstado);
             if (ServidorConectado) EnviarComandoControlador(socketCliente, CMD_LEFT);
         }
-        if (IsKeyPressed(KEY_SPACE)) {
+        if ((!ServidorConectado || TecladoHabilitado) && IsKeyPressed(KEY_SPACE)) {
             EnterCriticalSection(&BloqueoEstado);
             AplicarComandoLocal(&canon, &proyectil, CMD_FIRE);
             LeaveCriticalSection(&BloqueoEstado);
